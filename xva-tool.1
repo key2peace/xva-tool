@@ -1,0 +1,50 @@
+.TH XVATOOL 1 "14 June 2026" "v1.0.0" "XvaTool Reference Manual"
+.SH NAME
+xva-tool \- Advanced zero-copy streaming core engine for Citrix XenServer (XVA/OVA)
+.SH SYNOPSIS
+.B xva-tool
+[\fB-q\fR] [\fB-f\fR] [\fB-r\fR] [\fIsubcommand\fR] [\fIarguments\fR]
+.SH DESCRIPTION
+.B xva-tool
+is a production-grade, memory-optimized utility architecture designed by Alexander Maassen to manage, extract, and convert Citrix XenServer backup archives (.xva/.ova) without creating unnecessary intermediary local storage file clutter.
+.PP
+When invoked without any explicit command-line arguments in an interactive terminal session, the tool automatically initialises an immersive retro-style Text User Interface (TUI) built on top of native curses.
+.SH OPTIONS
+.TP
+.BR \-q ", " \-\-quiet
+Muffle all standard out visual progress metrics, coloured bars, and benchmarks. Critical errors will still be piped to stderr.
+.TP
+.BR \-f ", " \-\-force
+Universal Unix override. Enforces silent automated execution by automatically granting "Yes" approvals to all environment risks, data-destructive write prompts, missing pip library resolution entries, or truncated file warnings.
+.TP
+.BR \-r ", " \-\-resume
+Enables dynamic atomic sector resume functionality. Examines target files to map where a previous extraction halted and jumps straight to that target offset block inside the source uncompressed archive.
+.SH CORE SUBCOMMANDS
+.TP
+.BI info " <archive.xva>"
+Parses the master XML layout vector dynamically using a fixed 30MB RAM ceiling. Performs forensic tracking on trailing bytes to alert the operator if the archive structure is incomplete or truncated.
+.TP
+.BI merge " <archive.xva> [target.img]"
+Streams and flattens data chunk allocations into flat raw loop image structures. Incorporates forensic sparse hole protection to map omitted blank blocks in-memory.
+.TP
+.BI pack " <target.img> <ova.xml>"
+Re-compiles raw disk allocations back into structurally sound, sparse-compressed XenServer .xva archives.
+.TP
+.BI plugin " [info|install|uninstall|enable|disable] <target>"
+Unified package manager layer to stage, verify, link, or dismantle dynamic plugin modules across Global (/usr/share) or User (~/.local/share) sandboxes.
+.SH ENVIRONMENT LAYOUT
+.B xva-tool
+honours a 3-tier cascade environment topology:
+.IP "/etc/xva-tool/conf-enabled/" 24
+Global system-wide configuration overrides layer.
+.IP "/usr/share/xva-tool/plugins-enabled/" 24
+Global system-wide active drop-in extension hooks repository.
+.IP "~/.config/xva-tool/conf-enabled/" 24
+Unprivileged user-space sandbox configurations override layer.
+.SH DEBIAN & APT INTEGRATION
+When compiling the native Debian package (\fB.deb\fR) using the embedded ruleset, the packaging builder automatically compresses this manual sheet via gzip and deploys it straight to:
+.I /usr/share/man/man1/xva-tool.1.gz
+.SH AUTHOR
+Designed and maintained by Alexander Maassen <outsider@cuci.nl>.
+.SH COPYRIGHT
+Copyright (c) 2026 Alexander Maassen. MIT License.

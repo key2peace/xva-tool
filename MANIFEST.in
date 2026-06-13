@@ -1,0 +1,10 @@
+# XVATOOL Pip Packaging Data Manifest Alignment
+include xva-tool.conf.example
+include xva-tool.1
+include README.md
+include LICENSE.md
+include CREDITS.md
+include HISTORY.md
+include CODE_OF_CONDUCT.md
+recursive-include tests *.py
+recursive-include docs *.md

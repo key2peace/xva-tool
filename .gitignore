@@ -1,0 +1,53 @@
+# ==============================================================================
+#                  XVATOOL - GIT BLOCKLIST CONFIGURATION
+# ==============================================================================
+
+# Python local bytecode and execution artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating system directory cache artifacts
+.DS_Store
+Thumbs.db
+
+# Structural framework log file locations
+*.log
+logs/*
+!logs/README.md
+
+# Virtual storage schijfkopieën and hypervisor export targets
+*.img
+*.qcow2
+*.vmdk
+*.vhdx
+*.raw
+*.iso
+*_ova.xml
+
+# Cryptographic and forensic reporting file containers
+*.meta
+*.report
+bad_sectors.map
+logs/bad_sectors.map
+
+# Configuration overrides cascades files
+.xva-tool.conf
+.xva-tool.conf.local
+
+# Active plugin runtime linkage space
+plugins-enabled/*
+!plugins-enabled/__init__.py
+conf-enabled/*
+!conf-enabled/__init__.py
+
+# Distribution compilation output folders
+build/
+dist/
+*.egg-info/
+debian/.debhelper/
+debian/xvatool/
+debian/files
+debian/*.debhelper.log
+debian/*.substvars

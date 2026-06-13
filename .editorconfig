@@ -1,0 +1,22 @@
+# ==============================================================================
+#                  XVATOOL - EDITORCONFIG ALIGNMENT TEMPLATE
+# ==============================================================================
+# Topmost EditorConfig file marker declaration
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+[*.py]
+# Enforce strict Unix tab rules across the framework environment
+indent_style = tab
+indent_size = 4
+
+[*.md]
+# Allow trailing spaces in markdown files for explicit line breaks
+trim_trailing_whitespace = false
+indent_style = space
+indent_size = 4

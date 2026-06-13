@@ -1,0 +1,14 @@
+Source: xva-tool
+Section: utils
+Priority: optional
+Maintainer: Alexander Maassen <outsider@cuci.nl>
+Build-Depends: debhelper-compat (= 12), python2.7
+
+Package: xva-tool
+Architecture: all
+Depends: ${misc:Depends}, python2.7 (>= 2.7.5)
+Description: Advanced Zero-Copy Streaming Core Engine for XenServer
+ An enterprise-grade standalone utility designed by Alexander Maassen. 
+ Extracts and flattens XenServer XVA/OVA image streams into flat raw disk 
+ structures using a pure, zero-dependency Python 2.7 framework core.
+ Requires a full Python standard library layout with hashlib support.

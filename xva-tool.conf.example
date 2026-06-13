@@ -1,0 +1,67 @@
+# ==============================================================================
+#                      XVATOOL ENTERPRISE CORE CONFIGURATION TEMPLATE
+# ==============================================================================
+# This is the example core configuration template file for xva-tool. 
+# To activate it locally, copy this file to: .xva-tool.conf
+# To activate it globally, copy this file to: /etc/xva-tool/conf-available/global.conf
+# and create a symlink inside /etc/xva-tool/conf-enabled/10-global.conf
+#
+# Remember: Local configs overrule User configs, which overrule Global configs.
+# ==============================================================================
+
+[global]
+# Suppress all progress bars, visual metrics, and non-critical terminal output.
+# Excellent for headless cronjobs or background processing pipelines.
+# Options: True / False (Default: False)
+quiet = False
+
+# Enforce a specific system execution mode, bypassing auto-discovery.
+# auto: Dynamically scale layout bounds based on host /proc/meminfo limits.
+# sparse: Hardlock 1MB buffers with aggressive RAM garbage collection (~30MB ceiling).
+# performance: Boost blocks to 16MB chunking for maximum NVMe RAID IO throughput.
+# Options: auto / sparse / performance (Default: auto)
+resource_profile = auto
+
+# The secure local directory path where raw internal metadata XML descriptors 
+# (like ova.xml) are temporarily extracted and parsed during 'info' or 'merge'.
+# Options: Any absolute directory path with write permissions (Default: /tmp)
+output_xml_dir = /tmp
+
+# Enforce a custom log rotation size constraint (in Megabytes). 
+# Once the active log file hits this limit, a sequential rollover is triggered.
+# Options: Numeric integer value (Default: 50)
+max_log_size_mb = 50
+
+
+[merge]
+# The absolute target directory repository path where extracted raw .img storage 
+# volumes should be dynamically generated and written by default.
+# Options: Any writable mountpoint or directory (Default: ./ for current directory)
+default_output_dir = ./
+
+# Automatically trigger an atomic sector resume if a matching partial disk 
+# image allocation footprint is detected on the storage array layer.
+# Options: True / False (Default: True)
+auto_resume = True
+
+
+[pack]
+# The compression tier layout level employed during zlib archive building (.xva.gz).
+# Level 1 is fastest with low compression; 9 is slowest with maximum compression.
+# Options: Integer between 1 and 9 (Default: 6 - Balance option)
+compression_level = 6
+
+# Enforce mandatory compression execution globally when compiling new archives.
+# Options: True / False (Default: False - generates raw uncompressed .xva)
+default_compress = False
+
+
+[convert]
+# The standard structural target hypervisor format for on-the-fly streaming.
+# Options: qcow2 (Proxmox/KVM), vmdk (VMware ESXi), vhd (Hyper-V), raw (Flat), e01, aff4, iso
+default_format = qcow2
+
+# Absolute system path location targeting the 'qemu-img' architecture binary.
+# Leave blank to automatically activate the automated host environment PATH scan.
+# Options: String path (Default: blank)
+qemu_img_path = 

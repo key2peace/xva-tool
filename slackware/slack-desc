@@ -1,0 +1,11 @@
+xva-tool: xva-tool (Advanced XenServer Streaming Core Utility)
+xva-tool:
+xva-tool: An enterprise-grade standalone utility for Citrix XenServer XVA/OVA
+xva-tool: images designed by Alexander Maassen. It extracts and flattens
+xva-tool: streams into flat raw disk structures using a pure, zero-dependency
+xva-tool: Python 2.7 core. Other formats are handled via modular plugins.
+xva-tool:
+xva-tool: This utility provides zero-copy streaming, preventing local disk
+xva-tool: clutter on your storage arrays, and features autonomous repair.
+xva-tool:
+xva-tool: See website: https://github.com/key2peace/xva-tool

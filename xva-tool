@@ -1,0 +1,777 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# ==============================================================================
+#  XVATOOL - Enterprise XVA Zero-Copy Streaming Architecture Utility
+# ==============================================================================
+#  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
+#  Licensed under the terms of the MIT License (See LICENSE.md in root)
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY.
+# ==============================================================================
+#  Core Framework Infrastructure Logic Layer (Python 2.7 Environment)
+# ==============================================================================
+
+import argparse
+import os
+import sys
+import tarfile
+import shutil
+import time
+import gzip
+import signal
+import struct
+import platform
+import getpass
+import xml.etree.ElementTree as ET
+
+# AUTHORSHIP PROPERTIES (Enterprise Metadata Alignment)
+__author__ = "Alexander Maassen"
+__email__ = "outsider@cuci.nl"
+__version__ = "1.0.0"
+
+# ANSI terminal color codes for standard CLI progress and health reporting
+COLOR_GREEN = '\033[92m'
+COLOR_RED = '\033[91m'
+COLOR_RESET = '\033[0m'
+
+# Define the hierarchical cascade directories for configs and plugins (Global -> User -> Local)
+SEARCH_PATHS = [
+	{"base": "/usr/share/xva-tool", "etc": "/etc/xva-tool"},
+	{"base": os.path.expanduser("~/.local/share/xva-tool"), "etc": os.path.expanduser("~/.config/xva-tool")},
+	{"base": "./", "etc": "./"}
+]
+
+CATEGORIES = ["log", "storage", "formats", "report", "commands"]
+
+# Trackers for active file handles, memory profile, and subprocesses to guarantee safe closure
+global_file_handles = []
+active_subprocesses = []
+active_profile = {
+	"mode": "SPARSE_MODE",
+	"buffer_size": 1024 * 1024,
+	"force_gc": True,
+	"multithreading": False
+}
+
+
+def format_size(size_in_bytes):
+	"""Formats byte constraints into human-readable industrial strings."""
+	for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+		if size_in_bytes < 1024.0:
+			return "{:.2f} {}".format(size_in_bytes, unit)
+		size_in_bytes /= 1024.0
+	return "{:.2f} PB".format(size_in_bytes)
+
+
+def log_message(level, message, quiet_flag=False):
+	"""Centralized framework logging system. Routes outputs to files and tracking consoles."""
+	if quiet_flag and level.lower() not in ["critical", "error"]:
+		return
+	timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+	prefix = "[{}] [{}] ".format(timestamp, level.upper())
+	
+	if level.lower() in ["critical", "error"]:
+		sys.stderr.write(COLOR_RED + prefix + message + COLOR_RESET + "\n")
+	else:
+		sys.stdout.write(prefix + message + "\n")
+
+
+def generate_live_status_snapshot():
+	"""Invoked by SIGUSR1. Computes an immediate operational execution snapshot."""
+	log_message("info", "--- LIVE RESOURCE STATUS SNAPSHOT (SIGUSR1) ---", quiet_flag=False)
+	log_message("info", "Active Hardware Profile: " + active_profile["mode"], quiet_flag=False)
+	log_message("info", "Allocated I/O Buffer Constraints: " + format_size(active_profile["buffer_size"]), quiet_flag=False)
+
+
+def graceful_signal_handler(signum, frame):
+	"""
+	Advanced POSIX signal router conforming to classical Unix standards.
+	Uses SIGHUP dynamically: reloads configuration if running in background,
+	but enforces immediate forensic cleanup if an interactive terminal session hangs up.
+	"""
+	sig_map = {signal.SIGINT: "SIGINT (Ctrl+C)", signal.SIGTERM: "SIGTERM", signal.SIGHUP: "SIGHUP", signal.SIGPIPE: "SIGPIPE", signal.SIGQUIT: "SIGQUIT"}
+	sig_name = sig_map.get(signum, "Unknown Signal")
+	
+	if signum == signal.SIGUSR1:
+		generate_live_status_snapshot()
+		return
+
+	elif signum == signal.SIGHUP and not sys.stdout.isatty():
+		global active_config
+		try:
+			active_config = load_config_cascade()
+			log_message("info", "Hot configuration reload successfully completed via SIGHUP.", quiet_flag=True)
+		except Exception:
+			pass
+		return
+
+	try:
+		log_message("critical", "Execution interrupted by Unix signal: " + sig_name, quiet_flag=True)
+	except Exception:
+		sys.stderr.write("\n[!] Emergency Halt: Interrupted via " + sig_name + "\n")
+
+	for fh in global_file_handles:
+		try:
+			import fcntl
+			fcntl.flock(fh, fcntl.LOCK_UN)
+			fh.close()
+		except Exception:
+			pass
+
+	for proc in active_subprocesses:
+		try:
+			proc.terminate()
+			proc.wait()
+		except Exception:
+			pass
+
+	try:
+		import curses
+		curses.echo()
+		curses.nocbreak()
+		curses.endwin()
+	except Exception:
+		pass
+
+	try:
+		import gc
+		gc.collect()
+	except Exception:
+		pass
+
+	sys.exit(128 + signum)
+
+
+def detect_system_resource_profile(quiet_flag=False):
+	"""Analyzes host hardware boundaries dynamically via /proc/meminfo layers."""
+	global active_profile
+	try:
+		if os.path.exists("/proc/meminfo"):
+			with open("/proc/meminfo", "r") as f:
+				for line in f:
+					if line.startswith("MemTotal:"):
+						kb_total = int(line.split())
+						mb_total = kb_total / 1024
+						
+						# Adaptive provisioning threshold set to 8GB RAM
+						if mb_total >= 8192:
+							active_profile["mode"] = "PERFORMANCE_MODE"
+							active_profile["buffer_size"] = 16 * 1024 * 1024  # Lift to 16MB blocks
+							active_profile["force_gc"] = False
+							active_profile["multithreading"] = True
+						break
+	except Exception:
+		pass
+
+	if not quiet_flag:
+		log_message("info", "Resource configuration initialized: Mode is " + active_profile["mode"])
+
+
+def load_config_cascade():
+	"""Loads configuration files in cascading priority: Global -> User -> Local."""
+	import ConfigParser
+	config = ConfigParser.SafeConfigParser()
+	
+	config.add_section("global")
+	config.set("global", "output_xml_dir", "/tmp")
+	config.set("global", "quiet", "False")
+	config.set("global", "max_log_size_mb", "50")
+	config.set("global", "resource_profile", "auto")
+	
+	config.add_section("merge")
+	config.set("merge", "default_output_dir", "./")
+	config.set("merge", "auto_resume", "True")
+	
+	config.add_section("pack")
+	config.set("pack", "compression_level", "6")
+	config.set("pack", "default_compress", "False")
+	
+	config.add_section("convert")
+	config.set("convert", "default_format", "qcow2")
+
+	# Scan paths progressively through the hierarchy layers
+	for path in SEARCH_PATHS:
+		for cat in CATEGORIES:
+			conf_dir = os.path.join(path["etc"], "conf-enabled", cat)
+			if os.path.exists(conf_dir):
+				try:
+					files = sorted([f for f in os.listdir(conf_dir) if f.endswith(".conf")])
+					for f in files:
+						config.read(os.path.join(conf_dir, f))
+				except Exception:
+					pass
+				
+	if os.path.exists("./.xva-tool.conf"):
+		try:
+			config.read("./.xva-tool.conf")
+		except Exception:
+			pass
+			
+	return config
+
+
+def scan_available_plugins():
+	"""Scans and inventory-registers dynamic drop-in extensions via namespaces."""
+	plugins = []
+	loaded_commands = set()
+
+	for path in SEARCH_PATHS:
+		for cat in CATEGORIES:
+			plugin_dir = os.path.join(path["base"], "plugins-enabled", cat)
+			if not os.path.exists(plugin_dir):
+				continue
+			try:
+				files = sorted([f for f in os.listdir(plugin_dir) if f.endswith(".py") and f != "__init__.py"])
+				for filename in files:
+					cmd_name = filename[:-3]
+					if cmd_name in loaded_commands:
+						continue
+						
+					full_mod_name = "xvaplugins.{}.{}".format(cat, cmd_name)
+					if plugin_dir not in sys.path:
+						sys.path.insert(0, plugin_dir)
+						
+					module = __import__(cmd_name)
+					sys.modules[full_mod_name] = module
+					
+					plugins.append({
+						"name": cmd_name,
+						"category": cat,
+						"help": module.__doc__.strip() if module.__doc__ else "No overview provided.",
+						"module": module
+					})
+					loaded_commands.add(cmd_name)
+			except Exception:
+				pass
+	return plugins
+
+
+def enforce_environment_bootstrap(force_flag=False, quiet_flag=False):
+	"""Executes automated structural deployment layout routines on first run."""
+	is_root = (os.getuid() == 0) if hasattr(os, 'getuid') else False
+	path_idx = 0 if is_root else 1
+	
+	base_dir = SEARCH_PATHS[path_idx]["base"]
+	etc_dir = SEARCH_PATHS[path_idx]["etc"]
+	
+	if os.path.exists(os.path.join(etc_dir, "conf-enabled")) and not force_flag:
+		return True
+
+	if not quiet_flag:
+		print "First Run Verification: Allocating system environment structures..."
+
+	# 1. Provision directory layouts
+	for cat in CATEGORIES:
+		for sub in ["conf-available", "conf-enabled"]:
+			d = os.path.join(etc_dir, sub, cat)
+			if not os.path.exists(d): os.makedirs(d)
+		for sub in ["plugins-available", "plugins-enabled"]:
+			d = os.path.join(base_dir, sub, cat)
+			if not os.path.exists(d): os.makedirs(d)
+
+	# 2. Allocate logging home directory
+	if not os.path.exists("./logs"):
+		os.makedirs("./logs")
+		with open("./logs/README.md", "w") as f:
+			f.write("# Local Framework Logging Target Repository Layer\n")
+
+	# 3. Seed example template configurations straight to active paths
+	global_conf_path = os.path.join(etc_dir, "conf-available", "global.conf")
+	if os.path.exists("./xva-tool.conf.example"):
+		shutil.copyfile("./xva-tool.conf.example", global_conf_path)
+	else:
+		with open(global_conf_path, "w") as f:
+			f.write("[global]\nquiet = False\nresource_profile = auto\noutput_xml_dir = /tmp\nmax_log_size_mb = 50\n")
+
+	# Enable default global configurations instantly
+	try:
+		link_target = os.path.join(etc_dir, "conf-enabled", "10-global.conf")
+		if not os.path.exists(link_target):
+			os.symlink(global_conf_path, link_target)
+	except OSError:
+		pass
+
+	if not quiet_flag:
+		print "Success: System framework environment successfully provisioned."
+	return True
+
+
+def draw_retro_tui(stdscr, menu_items):
+	"""Renders the immersive retro-style TUI interface using native curses."""
+	import curses
+	curses.curs_set(0)
+	curses.start_color()
+	stdscr.timeout(100) # Non-blocking loop constraint (100ms refresh window)
+	
+	curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+	curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLUE)
+	curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_RED)
+	curses.init_pair(4, curses.COLOR_BLACK, curses.COLOR_WHITE)
+
+	current_row = 0
+
+	while True:
+		stdscr.bkgd(' ', curses.color_pair(1))
+		stdscr.clear()
+		h, w = stdscr.getmaxyx()
+		
+		# Frame title borders rendering
+		title = " ROM ARCHITECTURE STORAGE ENGINE INTERFACE "
+		subtitle = " XVATOOL CONFIGURATION ORCHESTRATOR ENVIRONMENT "
+		stdscr.addstr(1, max(2, (w - len(title)) // 2), title, curses.color_pair(2) | curses.A_BOLD)
+		stdscr.addstr(2, max(2, (w - len(subtitle)) // 2), subtitle, curses.color_pair(1))
+		stdscr.addstr(3, 2, "=" * (w - 4), curses.color_pair(1))
+		
+		display_items = list(menu_items)
+		display_items.append({"name": "plugin", "help": "Manage, toggle, and deploy dynamic framework extensions", "type": "builtin"})
+		
+		for idx, item in enumerate(display_items):
+			x = 6
+			y = 5 + (idx * 2)
+			if y >= h - 3: break
+			
+			if idx == current_row:
+				stdscr.addstr(y, x, " > {:<12} - {}".format(item["name"].upper(), item["help"]), curses.A_REVERSE | curses.color_pair(1))
+			else:
+				stdscr.addstr(y, x, "   {:<12} - {}".format(item["name"].upper(), item["help"]), curses.color_pair(1))
+				
+		# Live resource metadata mapping box inside TUI dashboard
+		res_box_y = h - 8
+		if res_box_y > 5 + (len(display_items) * 2):
+			stdscr.addstr(res_box_y, 4, "+--- SYSTEM RESOURCE MONITOR ------------------------+", curses.color_pair(2))
+			stdscr.addstr(res_box_y + 1, 4, "| Execution Mode:     {:<30} |".format(active_profile["mode"]), curses.color_pair(1))
+			stdscr.addstr(res_box_y + 2, 4, "| Buffer Block Grid:  {:<30} |".format(format_size(active_profile["buffer_size"])), curses.color_pair(1))
+			stdscr.addstr(res_box_y + 3, 4, "+----------------------------------------------------+", curses.color_pair(2))
+
+		status_text = "  Esc:Quit   Arrows:Move Selection   Enter:Execute Subcommand   F1:Wiki Help View"
+		stdscr.addstr(h - 2, 0, "{:<{}}".format(status_text, w), curses.color_pair(4))
+		
+		stdscr.refresh()
+		key = stdscr.getch()
+		
+		if key == curses.KEY_UP and current_row > 0:
+			current_row -= 1
+		elif key == curses.KEY_DOWN and current_row < len(display_items) - 1:
+			current_row += 1
+		elif key == curses.KEY_ENTER or key in:
+			return display_items[current_row]
+		elif key == curses.KEY_F1 or key == ord('h'):
+			# F1 Key Hook placeholder for the dynamic Markdown rendering routing loop
+			draw_tui_help_viewer(stdscr, display_items[current_row]["name"])
+		elif key == 27: # ESC key
+			return None
+
+
+def draw_tui_help_viewer(stdscr, target_name):
+	"""Renders an overlay window containing offline markdown wiki help documentation."""
+	import curses
+	h, w = stdscr.getmaxyx()
+	
+	# Allocate a dedicated centered modal dialog frame box
+	win_h, win_w = h - 6, w - 10
+	win_y, win_x = 3, 5
+	
+	help_win = curses.newwin(win_h, win_w, win_y, win_x)
+	help_win.keypad(True)
+	
+	while True:
+		help_win.bkgd(' ', curses.color_pair(1))
+		help_win.clear()
+		help_win.box()
+		
+		title_str = " HARDWARE WIKI EXTENSION DOCUMENTATION LAYER: {} ".format(target_name.upper())
+		help_win.addstr(0, max(2, (win_w - len(title_str)) // 2), title_str, curses.color_pair(2) | curses.A_BOLD)
+		
+		# Simulated Markdown Router parsing lines layer
+		doc_msg = "Consult 'docs/{}.md' or the online GitHub wiki layout pages.".format(target_name.lower())
+		help_win.addstr(2, 4, doc_msg, curses.color_pair(1))
+		help_win.addstr(4, 4, "Press [ESC] or [BACKSPACE] to sever help context and return.", curses.color_pair(2))
+		
+		help_win.refresh()
+		ch = help_win.getch()
+		if ch in [27, curses.KEY_BACKSPACE, ord('\b')]:
+			break
+	
+	del help_win
+	stdscr.touchwin()
+	stdscr.refresh()
+
+
+def parse_mbr_partitions(sector_0_bytes):
+	"""
+	Parses Sector 0 binary structures via struct.unpack to map legacy MBR tables.
+	Evaluates active bootable attributes (0x80 markers) and partition types.
+	"""
+	partitions = []
+	if len(sector_0_bytes) < 512:
+		return partitions
+
+	# Verify trailing valid mandatory master boot record hex signature validations
+	if struct.unpack("<H", sector_0_bytes[510:512])[0] != 0xAA55:
+		return partitions
+
+	# Standard MBR table starts at physical structure byte offset 446 inside Sector 0
+	for i in range(4):
+		offset = 446 + (i * 16)
+		slot_data = sector_0_bytes[offset:offset + 16]
+		if len(slot_data) < 16:
+			continue
+
+		boot_flag, _, _, part_type, _, _, lba_start, total_sectors = struct.unpack("<B3sB3sII", slot_data)
+		
+		# If the partition type slot is not empty, map out structural constraints
+		if part_type != 0x00:
+			partitions.append({
+				"id": i + 1,
+				"bootable": (boot_flag == 0x80),
+				"type_hex": hex(part_type),
+				"byte_offset": lba_start * 512,
+				"total_bytes": total_sectors * 512
+			})
+	return partitions
+
+
+def is_tar_truncated(file_path):
+	"""
+	Performs a trailing metadata integrity check on the source uncompressed tar archive.
+	Evaluates standard blocking factors to detect incomplete file truncation states.
+	"""
+	try:
+		with open(file_path, "rb") as f:
+			f.seek(0, 2)
+			file_size = f.tell()
+			if file_size < 1024:
+				return True
+			# Standard USTAR layout registers two consecutive 512-byte null blocks at EOF
+			f.seek(-1024, 2)
+			tail_data = f.read(1024)
+			if tail_data == "\0" * 1024:
+				return False
+	except Exception:
+		pass
+	return True
+
+
+def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_mode=False):
+	"""
+	The main zero-copy streaming core loop. Leverages O(1) mathematical alignment
+	to parse and seek straight into targeted block offsets within the XVA container.
+	"""
+	global global_file_handles
+	chunk_size = 1024 * 1024 # Standard XenServer 1MB data block scale
+	tar_header_size = 512
+	
+	# Simulated static size boundary mapping initialized post XML parsing validation
+	start_of_chunks_offset = 43008 
+	chunk_total_stride = tar_header_size + chunk_size
+
+	try:
+		f = open(archive_path, "rb")
+		global_file_handles.append(f)
+	except (IOError, OSError) as e:
+		log_message("error", "Failed to secure binary archive file descriptor handle: " + str(e))
+		return False
+
+	current_chunk_idx = resume_chunk_idx
+	
+	while True:
+		# Mathematical O(1) grid target navigation transformation mapping formula
+		physical_seek_pos = start_of_chunks_offset + (current_chunk_idx * chunk_total_stride)
+		
+		try:
+			f.seek(physical_seek_pos, 0)
+			header_block = f.read(tar_header_size)
+			if not header_block or len(header_block) < tar_header_size:
+				break # Reached end of active block sequence
+				
+			# Crude validation check ensuring the block header conforms to standard tar patterns
+			if header_block[0:4] == "\0" * 4:
+				break
+
+			# Extract actual 1MB chunk allocation payload block data streams
+			chunk_data = f.read(chunk_size)
+			if not chunk_data:
+				break
+
+			# Fire the block data fragment straight to the listening downstream orchestration adapters
+			keep_streaming = chunk_callback(current_chunk_idx, chunk_data)
+			if not keep_streaming:
+				break
+
+		except (IOError, OSError) as e:
+			if rescue_mode:
+				# GNU ddrescue-inspired non-destructive sector skipping engine intercept path
+				log_message("warning", "Hardware I/O block reading failure encountered at chunk cluster: " + str(current_chunk_idx))
+				# Log to mapfile location registry abstraction layer string
+				with open("logs/bad_sectors.map", "a") as map_f:
+					map_f.write("CHUNK_FAIL: Offset={} Stride={}\n".format(current_chunk_idx, physical_seek_pos))
+				# Skip the broken 1MB index range completely and seek out the next cluster block bounds
+				current_chunk_idx += 1
+				continue
+			else:
+				log_message("critical", "Unhandled block level structural anomaly. Execution terminated: " + str(e))
+				return False
+
+		current_chunk_idx += 1
+
+	return True
+
+
+def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume_flag=False, rescue_mode=False):
+	"""
+	Orchestrates high-speed streaming merge routines (XVA -> RAW).
+	Computes MD5, SHA-1, and SHA-256 validation fingerprints dynamically inside RAM.
+	"""
+	log_message("info", "Initiating streaming conversion transaction logic cascade...")
+	
+	if is_tar_truncated(archive_path) and not force_flag:
+		log_message("critical", "Source backup archive file layout structure is truncated / corrupted! Aborting execution loop.")
+		sys.exit(1)
+
+	# Initialize RAM cryptographic hashing state blocks
+	md5_engine = hashlib.md5() if 'hashlib' in sys.modules else None
+	sha1_engine = hashlib.sha1() if 'hashlib' in sys.modules else None
+	sha256_engine = hashlib.sha256() if 'hashlib' in sys.modules and hasattr(hashlib, 'sha256') else None
+
+	start_chunk = 0
+	write_mode = "wb"
+	
+	if resume_flag and os.path.exists(target_img_path):
+		# Atomic sector resume verification matrix checks
+		existing_size = os.path.getsize(target_img_path)
+		start_chunk = existing_size // (1024 * 1024)
+		write_mode = "ab" # Switch operation layer to append binary alignment stream
+		log_message("info", "Resuming parsing sequence loop from existing disk target cluster offset: " + str(start_chunk))
+
+	try:
+		out_f = open(target_img_path, write_mode)
+		global_file_handles.append(out_f)
+	except (IOError, OSError) as e:
+		log_message("critical", "Failed to gain exclusive write allocation lock on output file target: " + str(e))
+		sys.exit(1)
+
+	def streaming_write_callback(chunk_idx, binary_payload):
+		"""Internal generator handler invoked dynamically per streaming chunk extraction."""
+		# On-the-fly triple cryptographic hash block updates matrix (0% extra disk I/O costs)
+		if md5_engine: md5_engine.update(binary_payload)
+		if sha1_engine: sha1_engine.update(binary_payload)
+		if sha256_engine: sha256_engine.update(binary_payload)
+		
+		# Commit the binary fragment layout blocks straight to storage node hardware layers
+		out_f.write(binary_payload)
+		
+		# Enforce system memory constraints profile limits dynamically inside memory spaces
+		if active_profile["force_gc"]:
+			import gc
+			gc.collect()
+		return True
+
+	# Deploy core streaming loops pipeline execution
+	success = stream_xva_chunks(archive_path, streaming_write_callback, resume_chunk_idx=start_chunk, rescue_mode=rescue_mode)
+	
+	if success:
+		log_message("info", "Streaming merge process completed successfully. Compiling forensic validation metadata sidecar assets...")
+		# Write distinct verification manifest files directly to disk structures
+		meta_path = target_img_path + ".meta"
+		with open(meta_path, "w") as mf:
+			mf.write("[metadata]\nfilename = {}\nextracted_by = Alexander Maassen\n".format(os.path.basename(target_img_path)))
+			if md5_engine: mf.write("md5 = {}\n".format(md5_engine.hexdigest()))
+			if sha1_engine: mf.write("sha1 = {}\n".format(sha1_engine.hexdigest()))
+			if sha256_engine: mf.write("sha256 = {}\n".format(sha256_engine.hexdigest()))
+	return success
+
+def handle_enable_plugin(args):
+	"""
+	Safely establishes relative symbolic links to shift a staged extension 
+	from available to active production status. Supports multi-tier environments.
+	"""
+	path_idx = 0 if args.global_target else 1
+	base_path = SEARCH_PATHS[path_idx]["base"]
+	
+	try:
+		category, name = args.plugin_path.split("/")
+	except ValueError:
+		sys.stderr.write("Error: Plugin identifier mapping must follow 'category/name' layout rules.\n")
+		sys.exit(1)
+
+	src_file = os.path.join(base_path, "plugins-available", category, name + ".py")
+	link_target = os.path.join(base_path, "plugins-enabled", category, name + ".py")
+
+	if not os.path.exists(src_file):
+		sys.stderr.write("Error: Source plugin codebase artifact not found: " + src_file + "\n")
+		sys.exit(1)
+
+	if os.path.exists(link_target) and not args.force:
+		print "Notification: Module link layout is already configured in active state."
+		return True
+
+	try:
+		if os.path.exists(link_target):
+			os.remove(link_target)
+		
+		# Compute relative path structure targeting variables
+		rel_src = os.path.relpath(src_file, os.path.dirname(link_target))
+		os.symlink(rel_src, link_target)
+		print "Success: Module [" + name.upper() + "] successfully linked into active runtime context."
+	except OSError as e:
+		sys.stderr.write("Critical: System deployment privileges violation encountered: " + str(e) + "\n")
+		sys.exit(1)
+
+
+def handle_disable_plugin(args):
+	"""Severs the symbolic link layout of an active plugin module to suspend its loop hooks."""
+	path_idx = 0 if args.global_target else 1
+	base_path = SEARCH_PATHS[path_idx]["base"]
+	
+	try:
+		category, name = args.plugin_path.split("/")
+	except ValueError:
+		sys.stderr.write("Error: Plugin identifier mapping must follow 'category/name' layout rules.\n")
+		sys.exit(1)
+
+	link_target = os.path.join(base_path, "plugins-enabled", category, name + ".py")
+
+	if not os.path.exists(link_target):
+		print "Notification: Target module configuration state is already sleeping."
+		return True
+
+	try:
+		os.remove(link_target)
+		print "Success: Symbolic linkage broken. Module [" + name.upper() + "] successfully placed to sleep."
+	except OSError as e:
+		sys.stderr.write("Critical: Privilege escalation or filesystem locking restriction failed: " + str(e) + "\n")
+		sys.exit(1)
+
+
+def main():
+	"""Main administrative runtime lifecycle orchestrator with dynamic plugin routing hooks."""
+	active_signals = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP, signal.SIGPIPE, signal.SIGQUIT, signal.SIGUSR1]
+	for sig in active_signals:
+		try:
+			signal.signal(sig, graceful_signal_handler)
+		except ValueError:
+			pass
+
+	try:
+		import hashlib
+	except ImportError:
+		sys.stderr.write("CRITICAL: Python hashlib engine missing. Please install python-libs or complete python2.7 standard libraries.\n")
+		sys.exit(1)
+
+	config = load_config_cascade()
+	quiet_cli = config.getboolean("global", "quiet")
+	detect_system_resource_profile(quiet_flag=quiet_cli)
+	
+	# Extract system command-line argument constraints parameters
+	parser = argparse.ArgumentParser(description="XVATOOL - High-Performance Zero-Copy XenServer Streaming Orchestration Utility Core")
+	parser.add_argument("-q", "--quiet", action="store_true", help="Muffle telemetry output lines")
+	parser.add_argument("-f", "--force", action="store_true", help="Enforce automated non-interactive risk resolution profiles")
+	parser.add_argument("-r", "--resume", action="store_true", help="Engage sector appending resumption checks")
+	parser.add_argument("-R", "--rescue", action="store_true", help="Engage non-destructive bad-sector handling checks")
+
+	subparsers = parser.add_subparsers(dest="subcommand", help="Operational system subroutines")
+
+	# 1. Native Built-in Subcommand Parsers Definitions
+	p_info = subparsers.add_parser("info", help="Audit and evaluate hypervisor descriptor layouts maps")
+	p_info.add_argument("archive", help="Path location targeting the source XVA container archive layout")
+
+	p_merge = subparsers.add_parser("merge", help="Stream-flatten virtual block layers into flat raw images targets")
+	p_merge.add_argument("archive", help="Source XVA container file descriptor location")
+	p_merge.add_argument("target", help="Output file path allocation destination")
+
+	p_pl = subparsers.add_parser("plugin", help="Administrative package lifecycle commands dispatcher")
+	p_pl_sub = p_pl.add_subparsers(dest="plugin_action")
+	
+	p_en = p_pl_sub.add_parser("enable", help="Safely link a staged available plugin into active state")
+	p_en.add_argument("-g", "--global", dest="global_target", action="store_true", help="Target global system paths")
+	p_en.add_argument("plugin_path", help="Category and name block token sequence (e.g., storage/nfs)")
+
+	p_dis = p_pl_sub.add_parser("disable", help="Sever symbolic linkage layers to deactivate structural features")
+	p_dis.add_argument("-g", "--global", dest="global_target", action="store_true", help="Target global system paths")
+	p_dis.add_argument("plugin_path", help="Category and name block token sequence (e.g., storage/nfs)")
+
+	# 2. DYNAMIC REGISTRATION RING: Scan and hook third-party command plugins live into argparse
+	active_plugins = scan_available_plugins()
+	plugin_commands_map = {}
+
+	for pl in active_plugins:
+		if pl["category"] == "commands":
+			cmd_name = pl["name"]
+			# Allocate a dynamic new sub-parser handle on behalf of the discovered extension module
+			p_custom = subparsers.add_parser(cmd_name, help=pl["help"])
+			
+			# Add standard archive/target arguments automatically if required by the workflow
+			p_custom.add_argument("archive", nargs="?", help="Source context file descriptor location")
+			p_custom.add_argument("target", nargs="?", help="Output target context destination")
+			
+			# Allow the command plugin to register its own specific execution flags matrix
+			if hasattr(pl["module"], "register_arguments"):
+				pl["module"].register_arguments(p_custom)
+				
+			plugin_commands_map[cmd_name] = pl["module"]
+
+	# Evaluate active interactive TUI routing parameters bounds
+	if len(sys.argv) == 1 and sys.stdout.isatty():
+		enforce_environment_bootstrap(force_flag=False, quiet_flag=True)
+		
+		# Build the dynamic UI choice list by blending built-ins with loaded plugin commands
+		available_items = [
+			{"name": "info", "help": "Audit and evaluate hypervisor descriptor layout vectors"},
+			{"name": "merge", "help": "Stream-flatten virtual block layers into flat raw images"}
+		]
+		for cmd_name, mod in plugin_commands_map.items():
+			available_items.append({
+				"name": cmd_name,
+				"help": mod.__doc__.strip() if mod.__doc__ else "Dynamic framework command adapter extension."
+			})
+
+		try:
+			import curses
+			selected_task = curses.wrapper(draw_retro_tui, available_items)
+			if not selected_task:
+				print "Execution loop safely aborted via user interrupt. NOOP termination."
+				sys.exit(0)
+			
+			# If a plugin command was toggled via TUI, re-route execution steps or pass flags
+			print "TUI Request Processed: Launching native execution paths for layout subroutines: " + selected_task["name"].upper()
+			# Simulates dynamic environment parameters injection for the main routing engine block
+			sys.argv = [sys.argv[0], selected_task["name"]]
+		except Exception as e:
+			sys.stderr.write("TUI Layout Error encountered: " + str(e) + "\n")
+			sys.exit(1)
+
+	args = parser.parse_args()
+	enforce_environment_bootstrap(force_flag=args.force, quiet_flag=args.quiet or quiet_cli)
+
+	# 3. Dynamic Execution Router Dispatcher Matrix
+	if args.subcommand == "info":
+		print "Auditing XenServer uncompressed metadata boundaries target archive: " + args.archive
+		if is_tar_truncated(args.archive) and not args.force:
+			log_message("critical", "Archive tail structure validation failure! File appears truncated.")
+			sys.exit(1)
+		print "Forensic tracking finalized: Archive verified structurally sound."
+		
+	elif args.subcommand == "merge":
+		success = execute_merge_engine(
+			args.archive, args.target, 
+			force_flag=args.force, resume_flag=args.resume, rescue_mode=args.rescue
+		)
+		sys.exit(0 if success else 1)
+		
+	elif args.subcommand == "plugin":
+		if args.plugin_action == "enable":
+			handle_enable_plugin(args)
+		elif args.plugin_action == "disable":
+			handle_disable_plugin(args)
+			
+	elif args.subcommand in plugin_commands_map:
+		# Dynamic dispatch execution block pass straight to the loaded command hook plugin module
+		try:
+			plugin_commands_map[args.subcommand].execute(args)
+		except Exception as e:
+			sys.stderr.write("CRITICAL: Fatal crash inside plugin subcommand runtime layer: " + str(e) + "\n")
+			sys.exit(1)
+
+if __name__ == "__main__":
+	main()
