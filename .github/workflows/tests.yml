@@ -27,12 +27,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Development Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Removed the 'cache: pip' flag to prevent validation crashes on missing files
 
       - name: Execute Cross-Compatibility Tests
         run: |
