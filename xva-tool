@@ -452,11 +452,11 @@ def is_tar_truncated(file_path):
 		pass
 	return True
 
-
-def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_mode=False):
+def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_mode=False, throttle_mb=0):
 	"""
 	The main zero-copy streaming core loop. Leverages O(1) mathematical alignment
 	to parse and seek straight into targeted block offsets within the XVA container.
+	Includes an inline high-precision micro-sleep I/O throttle execution layer.
 	"""
 	global global_file_handles
 	chunk_size = 1024 * 1024 # Standard XenServer 1MB data block scale
@@ -475,7 +475,13 @@ def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_m
 
 	current_chunk_idx = resume_chunk_idx
 	
+	# Initialize rate-limiting metrics if throttle boundaries are defined
+	bytes_per_sec_limit = throttle_mb * 1024 * 1024 if throttle_mb > 0 else 0
+	
 	while True:
+		# Capture high-resolution timestamp before block execution
+		start_time = time.time() if bytes_per_sec_limit > 0 else 0
+		
 		# Mathematical O(1) grid target navigation transformation mapping formula
 		physical_seek_pos = start_of_chunks_offset + (current_chunk_idx * chunk_total_stride)
 		
@@ -499,14 +505,21 @@ def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_m
 			if not keep_streaming:
 				break
 
+			# Enforce hardware-level traffic pacing rate-limits if throttled
+			if bytes_per_sec_limit > 0:
+				actual_elapsed = time.time() - start_time
+				# Determine the ideal duration requirements for a 1MB sequential transfer
+				ideal_duration = float(chunk_size) / float(bytes_per_sec_limit)
+				if actual_elapsed < ideal_duration:
+					# Enforce precision micro-sleep task delays to lower production array friction
+					time.sleep(ideal_duration - actual_elapsed)
+
 		except (IOError, OSError) as e:
 			if rescue_mode:
 				# GNU ddrescue-inspired non-destructive sector skipping engine intercept path
 				log_message("warning", "Hardware I/O block reading failure encountered at chunk cluster: " + str(current_chunk_idx))
-				# Log to mapfile location registry abstraction layer string
 				with open("logs/bad_sectors.map", "a") as map_f:
 					map_f.write("CHUNK_FAIL: Offset={} Stride={}\n".format(current_chunk_idx, physical_seek_pos))
-				# Skip the broken 1MB index range completely and seek out the next cluster block bounds
 				current_chunk_idx += 1
 				continue
 			else:
@@ -518,7 +531,7 @@ def stream_xva_chunks(archive_path, chunk_callback, resume_chunk_idx=0, rescue_m
 	return True
 
 
-def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume_flag=False, rescue_mode=False):
+def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume_flag=False, rescue_mode=False, throttle_mb=0):
 	"""
 	Orchestrates high-speed streaming merge routines (XVA -> RAW).
 	Computes MD5, SHA-1, and SHA-256 validation fingerprints dynamically inside RAM.
@@ -529,7 +542,6 @@ def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume
 		log_message("critical", "Source backup archive file layout structure is truncated / corrupted! Aborting execution loop.")
 		sys.exit(1)
 
-	# Initialize RAM cryptographic hashing state blocks
 	md5_engine = hashlib.md5() if 'hashlib' in sys.modules else None
 	sha1_engine = hashlib.sha1() if 'hashlib' in sys.modules else None
 	sha256_engine = hashlib.sha256() if 'hashlib' in sys.modules and hasattr(hashlib, 'sha256') else None
@@ -538,10 +550,9 @@ def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume
 	write_mode = "wb"
 	
 	if resume_flag and os.path.exists(target_img_path):
-		# Atomic sector resume verification matrix checks
 		existing_size = os.path.getsize(target_img_path)
 		start_chunk = existing_size // (1024 * 1024)
-		write_mode = "ab" # Switch operation layer to append binary alignment stream
+		write_mode = "ab"
 		log_message("info", "Resuming parsing sequence loop from existing disk target cluster offset: " + str(start_chunk))
 
 	try:
@@ -552,27 +563,20 @@ def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume
 		sys.exit(1)
 
 	def streaming_write_callback(chunk_idx, binary_payload):
-		"""Internal generator handler invoked dynamically per streaming chunk extraction."""
-		# On-the-fly triple cryptographic hash block updates matrix (0% extra disk I/O costs)
 		if md5_engine: md5_engine.update(binary_payload)
 		if sha1_engine: sha1_engine.update(binary_payload)
 		if sha256_engine: sha256_engine.update(binary_payload)
-		
-		# Commit the binary fragment layout blocks straight to storage node hardware layers
 		out_f.write(binary_payload)
-		
-		# Enforce system memory constraints profile limits dynamically inside memory spaces
 		if active_profile["force_gc"]:
 			import gc
 			gc.collect()
 		return True
 
-	# Deploy core streaming loops pipeline execution
-	success = stream_xva_chunks(archive_path, streaming_write_callback, resume_chunk_idx=start_chunk, rescue_mode=rescue_mode)
+	# Deploy core streaming loops pipeline execution passing down our throttling boundaries
+	success = stream_xva_chunks(archive_path, streaming_write_callback, resume_chunk_idx=start_chunk, rescue_mode=rescue_mode, throttle_mb=throttle_mb)
 	
 	if success:
 		log_message("info", "Streaming merge process completed successfully. Compiling forensic validation metadata sidecar assets...")
-		# Write distinct verification manifest files directly to disk structures
 		meta_path = target_img_path + ".meta"
 		with open(meta_path, "w") as mf:
 			mf.write("[metadata]\nfilename = {}\nextracted_by = Alexander Maassen\n".format(os.path.basename(target_img_path)))
@@ -580,6 +584,7 @@ def execute_merge_engine(archive_path, target_img_path, force_flag=False, resume
 			if sha1_engine: mf.write("sha1 = {}\n".format(sha1_engine.hexdigest()))
 			if sha256_engine: mf.write("sha256 = {}\n".format(sha256_engine.hexdigest()))
 	return success
+
 
 def handle_enable_plugin(args):
 	"""
