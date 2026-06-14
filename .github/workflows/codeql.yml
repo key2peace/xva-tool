@@ -1,0 +1,37 @@
+1:  # ==============================================================================
+2:  #          XVATOOL - CODEQL SECURITY AUTOMATED SCANNING PIPELINE
+3:  # ==============================================================================
+4:  name: "XvaTool CodeQL Security Scan"
+5:  
+6:  concurrency:
+7:    group: ${{ github.workflow }}-${{ github.ref }}
+8:    cancel-in-progress: true
+9:  
+10: on:
+11:   push:
+12:     branches: [ main, master ]
+13:   pull_request:
+14:     branches: [ main, master ]
+15:   schedule:
+16:     - cron: '30 4 * * 0'  # Triggers automatically every Sunday at 04:30 UTC
+17: 
+18: jobs:
+19:   analyze:
+20:     name: "Analyze Python Source Elements"
+21:     runs-on: ubuntu-latest
+22:     permissions:
+23:       actions: read
+24:       contents: read
+25:       security-events: write
+26: 
+27:     steps:
+28:     - name: Check out repository source code
+29:       uses: actions/checkout@v4
+30: 
+31:     - name: Initialize CodeQL Framework Context
+32:       uses: github/codeql-action/init@v3
+33:       with:
+34:         languages: 'python'
+35: 
+36:     - name: Perform CodeQL Forensic Binary Analysis
+37:       uses: github/codeql-action/analyze@v3
