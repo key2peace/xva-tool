@@ -17,7 +17,7 @@ on:
 jobs:
   build-packages:
     name: "Compile Multi-Distro Native Packages"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
@@ -28,7 +28,7 @@ jobs:
     - name: Initialize Packaging Environments Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends dpkg-dev rpm binutils python2.7
+        sudo apt-get install -y --no-install-recommends dpkg-dev rpm binutils python2-minimal
 
     # --- 1. DEBIAN PACKAGING EXTREMITIES ---
     - name: Compile Native Debian Package (.deb)
@@ -69,7 +69,7 @@ jobs:
     # --- 4. PYTHON PIP SOURCE DIST EXTRINSICS ---
     - name: Compile Universal Python Source Tarball (.tar.gz)
       run: |
-        python2.7 setup.py sdist --formats=gztar
+        python2 setup.py sdist --formats=gztar
         cp dist/*.tar.gz .
 
     # --- 5. AUTOMATED ARTIFACT UPLOAD TO GITHUB RELEASE ---
@@ -82,4 +82,3 @@ jobs:
           *.rpm
           *.txz
           *.tar.gz
-
