@@ -32,7 +32,7 @@ def execute(args):
 		sys.exit(1)
 
 	archive_path = args.archive
-	print "Auditing structural XenServer container metadata: " + archive_path
+	print("Auditing structural XenServer container metadata: " + archive_path)
 
 	# Defensive execution path: check if file is readable
 	if not os.path.exists(archive_path):
@@ -48,7 +48,7 @@ def execute(args):
 	except ImportError:
 		pass
 
-	print "[*] Extracting master XML layout vectors descriptor stream..."
+	print("[*] Extracting master XML layout vectors descriptor stream...")
 	
 	# Secure XML Intercept parsing block protecting against XXE exploits
 	try:
@@ -69,9 +69,9 @@ def execute(args):
 		root_node = ET.fromstring(raw_xml_data, parser=parser_instance)
 		
 		# Metadata mapping discovery metrics loops
-		print "=============================================================================="
-		print "                XVATOOL VIRTUAL MACHINE HARDWARE MANIFEST AUDIT"
-		print "=============================================================================="
+		print("==============================================================================")
+		print("                XVATOOL VIRTUAL MACHINE HARDWARE MANIFEST AUDIT")
+		print("==============================================================================")
 		
 		vm_found = False
 		for vm_elem in root_node.findall(".//value/struct/member[name='name_label']/../member[name='uuid']/.."):
@@ -85,15 +85,15 @@ def execute(args):
 				if name_node is not None and name_node.text == "uuid":
 					vm_uuid = mem.find("value").text
 			
-			print "  Virtual Machine Name:  " + str(name_lbl)
-			print "  Hypervisor Fixed UUID: " + str(vm_uuid)
+			print("  Virtual Machine Name:  " + str(name_lbl))
+			print("  Hypervisor Fixed UUID: " + str(vm_uuid))
 			
 		if not vm_found:
 			# Fallback if standard nested RPC schemas layout structure varies
-			print "  [!] Warning: Nested RPC descriptor parsing completed with null items trees."
+			print("  [!] Warning: Nested RPC descriptor parsing completed with null items trees.")
 			
-		print "=============================================================================="
-		print " Forensic Scan Finalized: Archive verified structurally sound."
+		print("==============================================================================")
+		print(" Forensic Scan Finalized: Archive verified structurally sound.")
 		
 	except Exception as e:
 		sys.stderr.write("[!] Cryptographic XML layout extraction failure: " + str(e) + "\n")

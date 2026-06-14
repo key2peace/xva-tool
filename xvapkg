@@ -47,7 +47,7 @@ def handle_init(args):
 		sys.stderr.write("Error: Target directory '" + target_dir + "' already exists.\n")
 		sys.exit(1)
 
-	print "Initializing plugin development environment template for: " + plugin_name.upper()
+	print("Initializing plugin development environment template for: " + plugin_name.upper())
 
 	# Create standard plugin repository subdirectory layers
 	os.makedirs(target_dir)
@@ -72,7 +72,7 @@ def handle_init(args):
 		"\tpass\n\n"
 		"def execute(args):\n"
 		"\t\"\"\"Main orchestration lifecycle entrypoint execution block.\"\"\"\n"
-		"\tprint \"Executing " + plugin_name + " module execution context pipeline.\"\n"
+		"\tprint(\"Executing " + plugin_name + " module execution context pipeline.\")\n"
 	)
 	with open(os.path.join(target_dir, "module.py"), "w") as f:
 		f.write(module_code)
@@ -85,7 +85,7 @@ def handle_init(args):
 	with open(os.path.join(target_dir, "docs", "readme.md"), "w") as f:
 		f.write("# " + plugin_name.upper() + " Plugin Manual\nDocument usage patterns and target instructions here.\n")
 
-	print "Success: Enterprise development framework provisioned safely inside: " + target_dir
+	print("Success: Enterprise development framework provisioned safely inside: " + target_dir)
 
 
 def handle_build(args):
@@ -107,7 +107,7 @@ def handle_build(args):
 		sys.exit(1)
 
 	# Cryptographic fingerprinting phase: Calculate the active SHA-256 payload checksum
-	print "Computing cryptographic validation checksum block via SHA-256..."
+	print("Computing cryptographic validation checksum block via SHA-256...")
 	checksum = calculate_sha256(module_file)
 	if not checksum:
 		sys.stderr.write("Error: Failed to compute cryptographic checksum payload.\n")
@@ -122,7 +122,7 @@ def handle_build(args):
 		f.write("compiled_by = Alexander Maassen\n")
 
 	output_tarname = plugin_name + ".tar.gz"
-	print "Compiling production deployment distribution envelope: " + output_tarname
+	print("Compiling production deployment distribution envelope: " + output_tarname)
 
 	# Build and compress the target tarball cleanly
 	try:
@@ -136,7 +136,7 @@ def handle_build(args):
 			docs_path = os.path.join(src_dir, "docs")
 			if os.path.exists(docs_path):
 				tar.add(docs_path, arcname="docs")
-		print "Success: Cryptographically signed plugin ready for release deployment loops."
+		print("Success: Cryptographically signed plugin ready for release deployment loops.")
 	except Exception as e:
 		sys.stderr.write("Error: Packaging transaction failed: " + str(e) + "\n")
 	finally:

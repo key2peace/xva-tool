@@ -119,8 +119,8 @@ def execute(args):
 		sys.stderr.write("[!] Syntax Error: Usage requires 'xva-tool mount <source.xva> <target_dir>'.\n")
 		sys.exit(1)
 
-	print "Initializing high-speed FUSE virtual mapping abstraction loop..."
-	print "Mounting virtual raw volume straight to: " + args.target
+	print("Initializing high-speed FUSE virtual mapping abstraction loop...")
+	print("Mounting virtual raw volume straight to: " + args.target)
 
 	# Initialize and configure the operational FUSE server runtime daemon
 	fs = XvaVirtualFileSystem()
@@ -133,7 +133,7 @@ def execute(args):
 
 	try:
 		fs.main(fuse_args)
-		print "Success: FUSE instance safely dismantled and unmounted from system space."
+		print("Success: FUSE instance safely dismantled and unmounted from system space.")
 	except Exception as e:
 		sys.stderr.write("[!] FUSE Filesystem execution failure encountered: " + str(e) + "\n")
 		sys.exit(1)

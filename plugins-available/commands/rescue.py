@@ -37,12 +37,12 @@ def execute(args):
 	map_path = args.mapfile
 	max_errs = args.max_errors
 
-	print "Initializing non-destructive hardware sector salvage pipeline..."
-	print "Target sector error mapfile location: " + map_path
+	print("Initializing non-destructive hardware sector salvage pipeline...")
+	print("Target sector error mapfile location: " + map_path)
 
 	# Check if a previous recovery mapfile exists to seed historical logs
 	if os.path.exists(map_path):
-		print "[*] Existing sector mapfile discovered. Appending new block records."
+		print("[*] Existing sector mapfile discovered. Appending new block records.")
 	else:
 		# Allocate parent directories if missing
 		parent_dir = os.path.dirname(map_path)
@@ -61,7 +61,7 @@ def execute(args):
 		)
 		
 		if success:
-			print "Success: Salvage run finalized. Consult the mapfile for corruption health reports."
+			print("Success: Salvage run finalized. Consult the mapfile for corruption health reports.")
 		sys.exit(0 if success else 1)
 		
 	except ImportError:

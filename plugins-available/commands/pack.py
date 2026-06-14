@@ -44,8 +44,8 @@ def execute(args):
 		sys.stderr.write("[!] Packing Error: Source raw storage disk node does not exist.\n")
 		sys.exit(1)
 
-	print "Initializing streaming compilation cascade (RAW -> XVA)..."
-	print "Target archive destination: " + target_xva
+	print("Initializing streaming compilation cascade (RAW -> XVA)...")
+	print("Target archive destination: " + target_xva)
 
 	# Load cascade properties or fall back straight to command arguments flags
 	enforce_compression = args.compress
@@ -65,7 +65,7 @@ def execute(args):
 		sys.exit(1)
 
 	# 1. Seed the initial fake master configuration descriptor ova.xml
-	print "[*] Injecting primary virtual hypervisor structure manifest maps..."
+	print("[*] Injecting primary virtual hypervisor structure manifest maps...")
 	fake_xml = (
 		'<?xml version="1.0" encoding="UTF-8"?>'
 		'<value><struct>'
@@ -85,7 +85,7 @@ def execute(args):
 	if xml_padding < 512:
 		out_f.write("\0" * xml_padding)
 
-	print "[*] Entering binaire chunk extraction and streaming compression loops..."
+	print("[*] Entering binaire chunk extraction and streaming compression loops...")
 	chunk_idx = 0
 	
 	while True:
@@ -136,4 +136,4 @@ def execute(args):
 	
 	in_f.close()
 	out_f.close()
-	print "Success: Compilation sequence finalized cleanly. Output archive locked."
+	print("Success: Compilation sequence finalized cleanly. Output archive locked.")

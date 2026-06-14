@@ -113,7 +113,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 				if expected_link_substr in entry:
 					full_path = os.path.join(by_path_dir, entry)
 					local_device = os.path.realpath(full_path)
-					print "[*] Target iSCSI Block Allocation successfully mapped to node: " + local_device
+					print("[*] Target iSCSI Block Allocation successfully mapped to node: " + local_device)
 					return local_device
 
 		sys.stderr.write("[!] iSCSI Alignment Error: Login succeeded but failed to resolve local /dev block allocation node.\n")

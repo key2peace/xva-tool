@@ -170,7 +170,10 @@ def detect_system_resource_profile(quiet_flag=False):
 
 def load_config_cascade():
 	"""Loads configuration files in cascading priority: Global -> User -> Local."""
-	import ConfigParser
+	try:
+		import ConfigParser
+	except ImportError:
+		import configparser as ConfigParser
 	config = ConfigParser.SafeConfigParser()
 	
 	config.add_section("global")
@@ -259,7 +262,7 @@ def enforce_environment_bootstrap(force_flag=False, quiet_flag=False):
 		return True
 
 	if not quiet_flag:
-		print "First Run Verification: Allocating system environment structures..."
+		print("First Run Verification: Allocating system environment structures...")
 
 	# 1. Provision directory layouts
 	for cat in CATEGORIES:
@@ -293,7 +296,7 @@ def enforce_environment_bootstrap(force_flag=False, quiet_flag=False):
 		pass
 
 	if not quiet_flag:
-		print "Success: System framework environment successfully provisioned."
+		print("Success: System framework environment successfully provisioned.")
 	return True
 
 
@@ -608,7 +611,7 @@ def handle_enable_plugin(args):
 		sys.exit(1)
 
 	if os.path.exists(link_target) and not args.force:
-		print "Notification: Module link layout is already configured in active state."
+		print("Notification: Module link layout is already configured in active state.")
 		return True
 
 	try:
@@ -618,7 +621,7 @@ def handle_enable_plugin(args):
 		# Compute relative path structure targeting variables
 		rel_src = os.path.relpath(src_file, os.path.dirname(link_target))
 		os.symlink(rel_src, link_target)
-		print "Success: Module [" + name.upper() + "] successfully linked into active runtime context."
+		print("Success: Module [" + name.upper() + "] successfully linked into active runtime context.")
 	except OSError as e:
 		sys.stderr.write("Critical: System deployment privileges violation encountered: " + str(e) + "\n")
 		sys.exit(1)
@@ -638,12 +641,12 @@ def handle_disable_plugin(args):
 	link_target = os.path.join(base_path, "plugins-enabled", category, name + ".py")
 
 	if not os.path.exists(link_target):
-		print "Notification: Target module configuration state is already sleeping."
+		print("Notification: Target module configuration state is already sleeping.")
 		return True
 
 	try:
 		os.remove(link_target)
-		print "Success: Symbolic linkage broken. Module [" + name.upper() + "] successfully placed to sleep."
+		print("Success: Symbolic linkage broken. Module [" + name.upper() + "] successfully placed to sleep.")
 	except OSError as e:
 		sys.stderr.write("Critical: Privilege escalation or filesystem locking restriction failed: " + str(e) + "\n")
 		sys.exit(1)
@@ -736,11 +739,11 @@ def main():
 			import curses
 			selected_task = curses.wrapper(draw_retro_tui, available_items)
 			if not selected_task:
-				print "Execution loop safely aborted via user interrupt. NOOP termination."
+				print("Execution loop safely aborted via user interrupt. NOOP termination.")
 				sys.exit(0)
 			
 			# If a plugin command was toggled via TUI, re-route execution steps or pass flags
-			print "TUI Request Processed: Launching native execution paths for layout subroutines: " + selected_task["name"].upper()
+			print("TUI Request Processed: Launching native execution paths for layout subroutines: " + selected_task["name"].upper())
 			# Simulates dynamic environment parameters injection for the main routing engine block
 			sys.argv = [sys.argv[0], selected_task["name"]]
 		except Exception as e:
@@ -752,11 +755,11 @@ def main():
 
 	# 3. Dynamic Execution Router Dispatcher Matrix
 	if args.subcommand == "info":
-		print "Auditing XenServer uncompressed metadata boundaries target archive: " + args.archive
+		print("Auditing XenServer uncompressed metadata boundaries target archive: " + args.archive)
 		if is_tar_truncated(args.archive) and not args.force:
 			log_message("critical", "Archive tail structure validation failure! File appears truncated.")
 			sys.exit(1)
-		print "Forensic tracking finalized: Archive verified structurally sound."
+		print("Forensic tracking finalized: Archive verified structurally sound.")
 		
 	elif args.subcommand == "merge":
 		success = execute_merge_engine(
