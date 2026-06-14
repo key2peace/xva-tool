@@ -17,7 +17,7 @@ on:
 jobs:
   build-packages:
     name: "Compile Multi-Distro Native Packages"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-20.04
     permissions:
       contents: write
 
