@@ -1,50 +1,39 @@
-.TH XVATOOL 1 "14 June 2026" "v1.0.0" "XvaTool Reference Manual"
+.TH XVA-TOOL 1 "June 2026" "v1.0.0" "XvaTool Core Manual"
 .SH NAME
-xva-tool \- Advanced zero-copy streaming core engine for Citrix XenServer (XVA/OVA)
+xva-tool \- High-Performance Zero-Copy XenServer Streaming Orchestration Utility
 .SH SYNOPSIS
 .B xva-tool
-[\fB-q\fR] [\fB-f\fR] [\fB-r\fR] [\fIsubcommand\fR] [\fIarguments\fR]
+[\fB\-q\fR] [\fB\-f\fR] [\fB\-r\fR] [\fB\-R\fR] [\fB\-\-throttle\-mb\fR=\fIMB/s\fR] \fIsubcommand\fR [\fIarguments\fR]
 .SH DESCRIPTION
 .B xva-tool
-is a production-grade, memory-optimized utility architecture designed by Alexander Maassen to manage, extract, and convert Citrix XenServer backup archives (.xva/.ova) without creating unnecessary intermediary local storage file clutter.
-.PP
-When invoked without any explicit command-line arguments in an interactive terminal session, the tool automatically initialises an immersive retro-style Text User Interface (TUI) built on top of native curses.
+is a stream-driven processing framework designed to optimize the extraction, validation, and conversion of virtual machine disk images stored inside uncompressed XenServer XVA container formats.
 .SH OPTIONS
 .TP
-.BR \-q ", " \-\-quiet
-Muffle all standard out visual progress metrics, coloured bars, and benchmarks. Critical errors will still be piped to stderr.
+.B \-q, \-\-quiet
+Muffle system telemetry line updates inside the terminal window.
 .TP
-.BR \-f ", " \-\-force
-Universal Unix override. Enforces silent automated execution by automatically granting "Yes" approvals to all environment risks, data-destructive write prompts, missing pip library resolution entries, or truncated file warnings.
+.B \-f, \-\-force
+Bypass all interactive barriers, executing non-interactive permission loops.
 .TP
-.BR \-r ", " \-\-resume
-Enables dynamic atomic sector resume functionality. Examines target files to map where a previous extraction halted and jumps straight to that target offset block inside the source uncompressed archive.
-.SH CORE SUBCOMMANDS
+.B \-r, \-\-resume
+Engage block-level sector appending resumption checks on the output image file descriptor.
 .TP
-.BI info " <archive.xva>"
-Parses the master XML layout vector dynamically using a fixed 30MB RAM ceiling. Performs forensic tracking on trailing bytes to alert the operator if the archive structure is incomplete or truncated.
+.B \-R, \-\-rescue
+Engage a non-destructive bad-sector handling routine to bypass hardware read drops.
 .TP
-.BI merge " <archive.xva> [target.img]"
-Streams and flattens data chunk allocations into flat raw loop image structures. Incorporates forensic sparse hole protection to map omitted blank blocks in-memory.
+.B \-\-throttle\-mb=\fIMB/s\fR
+Enforces an administrative bandwidth constraint limiting sequential write throughput. Default is 0 (unlimited).
+.SH COMMANDS
 .TP
-.BI pack " <target.img> <ova.xml>"
-Re-compiles raw disk allocations back into structurally sound, sparse-compressed XenServer .xva archives.
+.B info \fIarchive\fR
+Extracts and validates primary XML hypervisor configuration tables.
 .TP
-.BI plugin " [info|install|uninstall|enable|disable] <target>"
-Unified package manager layer to stage, verify, link, or dismantle dynamic plugin modules across Global (/usr/share) or User (~/.local/share) sandboxes.
-.SH ENVIRONMENT LAYOUT
-.B xva-tool
-honours a 3-tier cascade environment topology:
-.IP "/etc/xva-tool/conf-enabled/" 24
-Global system-wide configuration overrides layer.
-.IP "/usr/share/xva-tool/plugins-enabled/" 24
-Global system-wide active drop-in extension hooks repository.
-.IP "~/.config/xva-tool/conf-enabled/" 24
-Unprivileged user-space sandbox configurations override layer.
-.SH DEBIAN & APT INTEGRATION
-When compiling the native Debian package (\fB.deb\fR) using the embedded ruleset, the packaging builder automatically compresses this manual sheet via gzip and deploys it straight to:
-.I /usr/share/man/man1/xva-tool.1.gz
-.SH AUTHOR
-Designed and maintained by Alexander Maassen <outsider@cuci.nl>.
-.SH COPYRIGHT
-Copyright (c) 2026 Alexander Maassen. MIT License.
+.B merge \fIarchive\fR \fItarget\fR
+Processes and collapses sparse disk layer sequences into a continuous flat RAW target volume.
+.TP
+.B verify \fIarchive\fR
+Executes an integrity allocation sweep across the container structure.
+.SH AUTHORS
+Developed and maintained by Alexander Maassen <outsider@cuci.nl>.
+.SH LICENSE
+Released under the terms of the MIT License.
