@@ -16,16 +16,16 @@ on:
 jobs:
   run-tests:
     name: "Execute Core Framework In-Memory Test Suite"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out repository source code
       uses: actions/checkout@v4
 
-    - name: Set up Native Python 2.7 Environment Core
+    - name: Set up Modern Python Environment Core
       uses: actions/setup-python@v5
       with:
-        python-version: '2.7'
+        python-version: '3.11'
 
     - name: Execute Embedded Operational Verification Test Harness
       run: |
