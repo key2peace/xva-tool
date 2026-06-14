@@ -74,7 +74,7 @@ jobs:
 
     # --- 5. AUTOMATED ARTIFACT UPLOAD TO GITHUB RELEASE ---
     - name: Deploy Binary Packages straight to Live GitHub Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
       with:
         files: |
