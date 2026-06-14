@@ -1,32 +1,40 @@
-# ==============================================================================
-#          XVATOOL - CONTINUOUS INTEGRATION AUTOMATED TESTING PIPELINE
-# ==============================================================================
-name: XvaTool Continuous Integration
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+name: XVA-TOOL Core Test Suite
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+
+# Force absolute execution serialization. Never kill in-progress test workflows.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  run-tests:
-    name: "Execute Core Framework In-Memory Test Suite"
+  validate:
+    name: Execute Framework Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
 
     steps:
-    - name: Check out repository source code
-      uses: actions/checkout@v6
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
 
-    - name: Set up Modern Python Environment Core
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.11'
+      - name: Setup Python Runtime Environment
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-    - name: Execute Embedded Operational Verification Test Harness
-      run: |
-        python xva-tool --quiet info /dev/null || true
+      - name: Install Development Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Execute Cross-Compatibility Tests
+        run: |
+          python -m compileall xva-tool plugins-available/
+          python xva-tool --help
