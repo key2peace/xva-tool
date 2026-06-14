@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-          # Removed the 'cache: pip' flag to prevent validation crashes on missing files
+          # Removed cache: 'pip' to prevent workflow crashes on dependency-free repos
 
       - name: Execute Cross-Compatibility Tests
         run: |
