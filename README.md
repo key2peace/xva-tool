@@ -23,7 +23,7 @@ When executed without any explicit command-line arguments in an interactive shel
 
 ## 🎯 Key Features
 
-* ⚡ Fixed-Grid Zero-Copy Extraction: Leverages bitwise wiskunde (idx >> 3) to target and read precise disk sectors inside uncompressed tarballs instantaneously via f.seek(), optimizing I/O.
+* ⚡ Fixed-Grid Zero-Copy Extraction:** Leverages bitwise mathematics (`idx >> 3`) to target and read precise disk sectors inside uncompressed tarballs instantaneously via `f.seek()`, optimizing I/O.
 * 💾 Stream-Driven Engine: Processes 64GB+ virtual disks without caching files to disk, eliminating redundant I/O write wear on high-throughput RAID arrays.
 * 🔒 Intelligent Advisory Locking: Implements kernel-level advisory locks via fcntl.flock to guarantee resource integrity and prevent concurrent modifications.
 * 📂 Pluggable Module Architecture: Incorporates an industry-standard plugins-available/plugins-enabled directory topology supporting dynamic lazy loading and environment self-verification.
@@ -115,7 +115,7 @@ Configure global or command-specific properties using clean INI definitions. Cop
 ---
 
 ## Documentation Wiki Pages
-Extensive architectural, development, and operational gids are located inside the docs/ repository space:
+Extensive architectural, development, and operational guides are located inside the docs/ repository space:
 *   [Framework Core Architecture Overview](docs/index.md)
 *   [Streaming Conversions and Bootable ISO Logic](docs/IMAGE_FORMATS.md)
 *   [URI-Routing, Advisory Locking, and Block Writes](docs/STORAGE_PROTOCOLS.md)
