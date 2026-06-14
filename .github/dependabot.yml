@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # We fully exclude pip dependency scanning to protect the Python 2.7 architecture
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # This completely disables automated pull requests for python libs
+    open-pull-requests-limit: 0
+
