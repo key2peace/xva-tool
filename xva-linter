@@ -68,6 +68,15 @@ def execute_repository_scan():
 				fix_file_layout(file_path)
 
 if __name__ == "__main__":
-	print("[*] Launching xva-tool Layout Linter & Fixer...")
-	execute_repository_scan()
-	print("[+] Repository style compliance unified successfully.")
+	import sys
+	# Als er specifieke bestanden worden meegegeven via de GitHub-runner of CLI argumenten
+	if len(sys.argv) > 1:
+		print(f"[*] Executing targeted file layout validation...")
+		for target_file in sys.argv[1:]:
+			if os.path.exists(target_file):
+				fix_file_layout(target_file)
+	else:
+		print("[*] Launching xva-tool Layout Linter & Fixer (Full Scan)...")
+		execute_repository_scan()
+		print("[+] Repository style compliance unified successfully.")
+
