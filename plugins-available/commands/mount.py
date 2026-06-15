@@ -76,7 +76,7 @@ class XvaVirtualFileSystem(fuse.Fuse):
 			st.st_mode = fuse.S_IFDIR | 488
 			st.st_nlink = 2
 		elif path == '/' + self.virtual_file_name:
-			st.st_mode = fuse.S_IFREG | 0644
+			st.st_mode = fuse.S_IFREG | 420
 			st.st_nlink = 1
 			st.st_size = self.virtual_file_size
 		else:
