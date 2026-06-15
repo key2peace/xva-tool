@@ -120,8 +120,7 @@ Pipes and compresses raw block streams into cryptographically signed open contai
 
 ### Developer Specifications
 ```text
-Dynamic E01 forensic format extension module.
-Pipes and compresses raw block streams into legally sound EnCase evidence files.
+Forensic Expert Witness (E01) image stream parser.
 ```
 ---
 
