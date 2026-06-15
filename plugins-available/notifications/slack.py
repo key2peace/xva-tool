@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVATOOL PLUGIN - Asynchronous Slack Incoming Webhook Notification Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic Slack notification extension module.
 Dispatches micro-managed JSON alert cards within an isolated background thread.

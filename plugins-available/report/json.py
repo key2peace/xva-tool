@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVATOOL PLUGIN - Machine-Readable JSON Telemetry & SIEM Aggregation Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic JSON reporting extension module.
 Generates RFC-compliant JSON objects optimized for centralized SIEM ingestors.

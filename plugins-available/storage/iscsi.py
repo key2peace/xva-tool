@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVATOOL PLUGIN - iSCSI / SAN Target Bare-Metal Storage Transport Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 XVA-TOOL Plugin: Storage - Enterprise iSCSI Target Handler
 

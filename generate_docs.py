@@ -1,10 +1,10 @@
+#!/usr/bin/env python3
 # ==============================================================================
 #      XVA-TOOL - Forensics & Recovery Tool designed for XenServer
 #
 #      copyright ©2026 Alexander Maassen & Gemini AI
 #      Distributed under the terms of the MIT License.
 # ==============================================================================
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 XVA-TOOL - Automated Developer API & Plugin Documentation Generator

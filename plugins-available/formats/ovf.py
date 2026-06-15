@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVAPLUGIN - OVF / OVA (VMware / VirtualBox) Cross-Compatibility Adapter
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic OVF/OVA conversion format extension module.
 Wraps raw disk allocations alongside generated OVF XML descriptors into USTAR tarballs.

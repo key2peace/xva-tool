@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVATOOL PLUGIN - Asynchronous Discord Webhook Notification Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic Discord notification extension module.
 Dispatches structured rich embed cards within an isolated background thread.

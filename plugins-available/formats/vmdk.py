@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVAPLUGIN - VMDK (VMware ESXi / Workstation) Monolithic Conversion Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic VMDK stream format extension module.
 Pipes raw block clusters directly into VMware-compliant targets via qemu-img.

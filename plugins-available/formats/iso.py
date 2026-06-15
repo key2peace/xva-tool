@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVATOOL PLUGIN - Hybrid Bootable ISO 9660 Generation Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic ISO compilation format extension module.
 Evaluates Sector 0 binary structures on-the-fly to trigger El Torito boot emulation.

@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVAPLUGIN - VHDX (Microsoft Hyper-V / Azure) High-Performance Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic VHDX stream format extension module.
 Pipes raw block clusters directly into Hyper-V compliant targets via qemu-img.

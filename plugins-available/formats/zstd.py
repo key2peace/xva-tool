@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVAPLUGIN - Zstandard (zstd) High-Throughput Streaming Compression Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic Zstandard stream format extension module.
 Pipes raw block clusters on-the-fly through multi-threaded zstd binaries.

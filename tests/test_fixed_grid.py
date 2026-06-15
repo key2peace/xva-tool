@@ -4,6 +4,7 @@
 #      copyright ©2026 Alexander Maassen & Gemini AI
 #      Distributed under the terms of the MIT License.
 # ==============================================================================
+# -*- coding: utf-8 -*-
 import unittest
 import struct
 

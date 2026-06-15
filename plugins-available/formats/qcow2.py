@@ -1,11 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # ==============================================================================
 #  XVAPLUGIN - QCOW2 (KVM / Proxmox VE) High-Performance Conversion Engine
 # ==============================================================================
 #  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
+# -*- coding: utf-8 -*-
 """
 Dynamic QCOW2 stream format extension module.
 Pipes raw block clusters on-the-fly into qemu-img without local caching.
