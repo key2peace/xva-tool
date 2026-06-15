@@ -1,0 +1,55 @@
+name: xva-tool Layout Linter
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Noodzakelijk om de complete Git-historie te laden voor changed files
+
+      - name: Set up Python environment
+        uses: actions/preferred-python-version@v1
+        with:
+          python-version: '3.x'
+
+      - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.py
+            **.spec
+            **.conf
+            **.md
+
+      - name: Execute target file linting
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          chmod +x ./xva-linter
+          # Loop uitsluitend door de door GitHub gedetecteerde gewijzigde bestanden
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              echo "[*] GitHub CI: Linting changed file -> $file"
+              ./xva-linter "$file"
+            fi
+          done
+
+      - name: Verify strict layout integrity
+        run: |
+          # Als de linter wijzigingen heeft gemaakt, staat er data open in 'git status'
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "[CRITICAL ERROR] Code style violation detected!"
+            echo "The files listed above do not comply with our strict layout rules (tabs, Unix LF, copyright headers)."
+            echo "Please run ./xva-linter locally on your machine, commit the layout fixes, and push again."
+            git diff
+            exit 1
+          fi
+          echo "[+] GitHub CI: All changed files conform 100% to framework styling rules."
