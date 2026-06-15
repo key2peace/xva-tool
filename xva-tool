@@ -192,7 +192,7 @@ def load_config_cascade():
 		import ConfigParser
 	except ImportError:
 		import configparser as ConfigParser
-	config = ConfigParser.SafeConfigParser()
+	config = ConfigParser.ConfigParser()
 	
 	config.add_section("global")
 	config.set("global", "output_xml_dir", "/tmp")

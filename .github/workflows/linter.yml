@@ -16,9 +16,9 @@ jobs:
           fetch-depth: 0 # Noodzakelijk om de complete Git-historie te laden voor changed files
 
       - name: Set up Python environment
-        uses: actions/preferred-python-version@v1
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
       - name: Get list of changed files
         id: changed-files
