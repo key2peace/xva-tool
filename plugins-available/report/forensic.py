@@ -35,16 +35,16 @@ def register_arguments(parser):
 
 def compile_report(target_image_path, checksum_dict, args=None):
 	"""
-	Generates an unassailable, structured flat-file forensic audit log sheet 
+	Generates an unassailable, structured flat-file forensic audit log sheet
 	directly alongside the extracted volume output path to preserve the chain of custody.
 	"""
 	report_file_path = target_image_path + ".report"
 	timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-	
+
 	case_num = "CASE-UNDEFINED"
 	evid_id = "EVID-UNDEFINED"
 	notes_str = "Automated extraction pipeline run"
-	
+
 	if args:
 		if hasattr(args, 'case_number'): case_num = args.case_number
 		if hasattr(args, 'evidence_id'): evid_id = args.evidence_id
@@ -59,19 +59,19 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			rf.write(" Framework Version:  1.0.0\n")
 			rf.write(" Verification Date:  {}\n".format(timestamp))
 			rf.write("==============================================================================\n\n")
-			
+
 			rf.write("[INVESTIGATION METADATA]\n")
 			rf.write("Case Number:        {}\n".format(case_num))
 			rf.write("Evidence ID:        {}\n".format(evid_id))
 			rf.write("Operator ID:        {} (UID={})\n".format(getpass.getuser(), os.getuid() if hasattr(os, 'getuid') else 0))
 			rf.write("Notes / Description:{}\n\n".format(notes_str))
-			
+
 			rf.write("[SYSTEM ENVIRONMENT BLOCK]\n")
 			rf.write("Host Node Name:     {}\n".format(platform.node()))
 			rf.write("Operating System:   {}\n".format(platform.platform()))
 			rf.write("Active Kernel Build:{}\n".format(platform.uname()[2]))
 			rf.write("Process ID (PID):   {}\n\n".format(os.getpid()))
-			
+
 			rf.write("[RESOURCE ACQUISITION TARGETS]\n")
 			rf.write("Destination Image:  {}\n".format(os.path.basename(target_image_path)))
 			rf.write("FHS Physical Path:  {}\n".format(os.path.abspath(target_image_path)))
@@ -91,7 +91,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			rf.write("==============================================================================\n")
 			rf.write("       CHAIN OF CUSTODY VERIFIED - DATA ACQUISITION LOG TRANSCRIPTION EOF\n")
 			rf.write("==============================================================================\n")
-			
+
 		return True
 	except (IOError, OSError) as e:
 		sys.stderr.write("[!] Forensic Reporting Engine Failure: " + str(e) + "\n")

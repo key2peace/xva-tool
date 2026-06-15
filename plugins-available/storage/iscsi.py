@@ -9,15 +9,15 @@
 """
 XVA-TOOL Plugin: Storage - Enterprise iSCSI Target Handler
 
-This module orchestrates remote raw block storage streams straight from 
-iSCSI Storage Area Networks (SAN). It wraps around system 'iscsiadm' loops 
+This module orchestrates remote raw block storage streams straight from
+iSCSI Storage Area Networks (SAN). It wraps around system 'iscsiadm' loops
 to detect, log in, and expose remote LUN targets as local block devices.
 
 Developer Specifications:
     - Module Class: storage
     - System Dependencies: open-iscsi package binary availability.
-    - Security Isolation: Requires careful execution context separation 
-                           to prevent credential leakages into logs.
+    - Security Isolation: Requires careful execution context separation
+			   to prevent credential leakages into logs.
 """
 
 import os
@@ -38,7 +38,7 @@ def is_supported():
 	"""
 	binary_name = "iscsiadm"
 	path_env = os.environ.get("PATH", "")
-	
+
 	is_root = (os.getuid() == 0 if hasattr(os, "getuid") else False)
 	if not is_root:
 		return False
@@ -71,10 +71,10 @@ def parse_iscsi_uri(uri_string):
 		portal, target_suffix = clean_uri.split("/", 1)
 	else:
 		portal = clean_uri
-	
+
 	if ":" not in portal:
 		portal = "{}:3260".format(portal) # Fallback to default iSCSI port
-		
+
 	return portal
 
 
@@ -114,12 +114,12 @@ def prepare_storage(uri_string, args=None, read_only=False):
 			sys.stderr.write("[!] iSCSI Session Login Refused: " + stderr.strip() + "\n")
 			return None
 
-		# 4. Block device mapping auto-discovery loop. 
+		# 4. Block device mapping auto-discovery loop.
 		# We find the new drive node path by tracing the target symlinks inside disk/by-path
 		by_path_dir = "/dev/disk/by-path"
 		portal_clean = portal.replace(":", "-port-")
 		expected_link_substr = "iscsi-{}-{}".format(portal_clean, target_iqn)
-		
+
 		# Give the kernel SCSI subsystem a tiny structural breath to populate block nodes
 		import time
 		time.sleep(1.5)
@@ -156,7 +156,7 @@ def cleanup_storage(uri_string, args=None):
 	try:
 		# Enforce a synchronized physical flush step to block loss states before disconnecting
 		subprocess.call(["sync"])
-		
+
 		# Log out from the remote block node target session
 		subprocess.Popen(["iscsiadm", "-m", "node", "-T", target_iqn, "-p", portal, "--logout"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 	except (OSError, ValueError):

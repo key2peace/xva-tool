@@ -30,7 +30,7 @@ def is_supported():
 	"""
 	if PYEWF_AVAILABLE:
 		return True
-	
+
 	# Fallback: scan the system execution PATH for ewfcreate
 	binary_name = "ewfcreate"
 	path_env = os.environ.get("PATH", "")
@@ -51,12 +51,12 @@ def register_arguments(parser):
 
 def get_write_pipeline(target_path, args=None):
 	"""
-	Secure Downstream Pipe Provisioning. Launches ewfcreate using strict 
+	Secure Downstream Pipe Provisioning. Launches ewfcreate using strict
 	array-string arguments to map the incoming bitstream directly to the silicon.
 	"""
 	description_str = "xva-tool Forensic Acquisition Run"
 	compression_tier = "fast"
-	
+
 	if args:
 		if hasattr(args, "e01_description"): description_str = args.e01_description
 		if hasattr(args, "e01_compression"): compression_tier = args.e01_compression

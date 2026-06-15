@@ -3,7 +3,7 @@
 This document specifies the streaming compression pipelines and production bandwidth controls implemented within the framework.
 
 ## Zstandard (zstd) Streaming Pipeline
-The `zstd.py` format extension module pipes raw block clusters directly through the multi-threaded system `zstd` binary. 
+The `zstd.py` format extension module pipes raw block clusters directly through the multi-threaded system `zstd` binary.
 
 ### Operational Parameters
 *   `--zstd-level [1-22]`: Sets the mathematical compression level. Default is `3`.

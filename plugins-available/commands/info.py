@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Command - Information Extraction
 
-This module implements the structural metadata analysis for uncompressed 
-XVA containers. It hooks into the main execution cycle to parse the leading 
+This module implements the structural metadata analysis for uncompressed
+XVA containers. It hooks into the main execution cycle to parse the leading
 'ova.xml' descriptor without executing a full container extraction loop.
 
 Developer Specifications:
@@ -20,7 +20,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 """
 
 import os
@@ -67,7 +67,7 @@ def execute(args):
 		pass
 
 	print("[*] Extracting master XML layout vectors descriptor stream...")
-	
+
 	# Secure XML Intercept parsing block protecting against XXE exploits
 	try:
 		# We restrict memory by reading only the initial 10MB chunk boundary sequence
@@ -76,21 +76,21 @@ def execute(args):
 			tar_header = f.read(512)
 			if not tar_header or len(tar_header) < 512:
 				raise ValueError("Malformed archive block envelope header.")
-				
+
 			# Safely extract the inner payload size from octal representation layout
 			xml_size = int(tar_header[124:136].strip('\x00').strip(), 8)
 			raw_xml_data = f.read(xml_size)
-			
+
 		# Enforce entity block omissions to bypass advanced resource exhaustion attempts
 		parser_instance = ET.XMLParser()
 		# Python 2.7 ElementTree does not process external DTD structures by default
 		root_node = ET.fromstring(raw_xml_data, parser=parser_instance)
-		
+
 		# Metadata mapping discovery metrics loops
 		print("==============================================================================")
 		print("                XVATOOL VIRTUAL MACHINE HARDWARE MANIFEST AUDIT")
 		print("==============================================================================")
-		
+
 		vm_found = False
 		for vm_elem in root_node.findall(".//value/struct/member[name='name_label']/../member[name='uuid']/.."):
 			vm_found = True
@@ -102,17 +102,17 @@ def execute(args):
 					name_lbl = mem.find("value").text
 				if name_node is not None and name_node.text == "uuid":
 					vm_uuid = mem.find("value").text
-			
+
 			print("  Virtual Machine Name:  " + str(name_lbl))
 			print("  Hypervisor Fixed UUID: " + str(vm_uuid))
-			
+
 		if not vm_found:
 			# Fallback if standard nested RPC schemas layout structure varies
 			print("  [!] Warning: Nested RPC descriptor parsing completed with null items trees.")
-			
+
 		print("==============================================================================")
 		print(" Forensic Scan Finalized: Archive verified structurally sound.")
-		
+
 	except Exception as e:
 		sys.stderr.write("[!] Cryptographic XML layout extraction failure: " + str(e) + "\n")
 		sys.exit(1)

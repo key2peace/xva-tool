@@ -17,12 +17,12 @@ import subprocess
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the 'qemu-img' subsystem 
+	Proactive Environment Check. Verifies if the 'qemu-img' subsystem
 	is accessible on the host machine to compile VHDX metadata layout structures.
 	"""
 	binary_name = "qemu-img"
 	path_env = os.environ.get("PATH", "")
-	
+
 	for path_dir in path_env.split(os.path.pathsep):
 		candidate_path = os.path.join(path_dir, binary_name)
 		if os.path.isfile(candidate_path) and os.access(candidate_path, os.X_OK):
@@ -46,7 +46,7 @@ def get_write_pipeline(target_path, args=None):
 	"""
 	subformat = "dynamic"
 	block_size = "1048576"
-	
+
 	if args:
 		if hasattr(args, 'vhdx_subformat'): subformat = args.vhdx_subformat
 		if hasattr(args, 'vhdx_block_size'): block_size = str(args.vhdx_block_size)

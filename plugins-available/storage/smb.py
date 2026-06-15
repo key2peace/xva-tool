@@ -18,7 +18,7 @@ import shutil
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the standard Linux CIFS mount helper 
+	Proactive Environment Check. Verifies if the standard Linux CIFS mount helper
 	binary is fully discoverable and executable within the system paths.
 	"""
 	return os.path.exists("/sbin/mount.cifs")
@@ -39,7 +39,7 @@ def parse_smb_uri(uri_string):
 	Isolates credentials cleanly from network host strings.
 	"""
 	clean_uri = uri_string.replace("smb://", "").replace("cifs://", "")
-	
+
 	if "/" not in clean_uri:
 		return None, None, None, None
 
@@ -60,7 +60,7 @@ def parse_smb_uri(uri_string):
 	share_parts = [p for p in share_path.split("/") if p]
 	if not share_parts:
 		return None, None, None, None
-		
+
 	base_share = share_parts[0]
 	nested_path = "/" + "/".join(share_parts[1:]) if len(share_parts) > 1 else "/"
 
@@ -97,7 +97,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 
 	smb_ver = "3.0"
 	smb_opts = "iocharset=utf8,noperm"
-	
+
 	if args:
 		if hasattr(args, 'smb_version'): smb_ver = args.smb_version
 		if hasattr(args, 'smb_options'): smb_opts = args.smb_options
@@ -115,14 +115,14 @@ def prepare_storage(uri_string, args=None, read_only=False):
 		options_list.append("ro")
 	if smb_opts:
 		options_list.append(smb_opts)
-		
+
 	if options_list:
 		cmd_array[-1] += "," + ",".join(options_list)
 
 	try:
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		_, stderr = proc.communicate()
-		
+
 		# Always wipe the localized plaintext credentials file from disk immediately
 		if os.path.exists(cred_file):
 			os.remove(cred_file)
@@ -154,7 +154,7 @@ def cleanup_storage(local_mapped_path):
 	base_indices = [i for i, p in enumerate(parts) if p.startswith("xvatool_smb_")]
 	if not base_indices:
 		return
-		
+
 	local_mountpoint = "/".join(parts[:base_indices[0] + 1])
 
 	if not os.path.exists(local_mountpoint):
@@ -164,7 +164,7 @@ def cleanup_storage(local_mapped_path):
 	try:
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc.communicate()
-		
+
 		if os.path.exists(local_mountpoint):
 			shutil.rmtree(local_mountpoint, ignore_errors=True)
 	except (OSError, ValueError):

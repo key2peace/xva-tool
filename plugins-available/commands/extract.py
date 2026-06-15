@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Command - Container Extraction Engine
 
-This module implements the low-level extraction process for uncompressed 
-XVA containers. It processes the internal tarball stream, extracts individual 
+This module implements the low-level extraction process for uncompressed
+XVA containers. It processes the internal tarball stream, extracts individual
 1MB binary disk segments sequentially, and recreates the path layouts.
 
 Developer Specifications:
@@ -36,28 +36,28 @@ def execute(args, global_state):
 	source_xva = args.target
 	output_dir = args.output if getattr(args, 'output', None) else "extracted_chunks"
 	interactive = getattr(args, 'interactive', False)
-	
+
 	print("[*] Opening target container archive: " + source_xva)
 	if not os.path.exists(source_xva):
 		print("[❌] Critical: Source XVA container path does not exist.")
 		sys.exit(1)
-		
+
 	try:
 		with tarfile.open(source_xva, "r:") as tar:
 			print("[*] Scanning structural archive descriptors...")
 			members = tar.getmembers()
 			total_files = len(members)
 			print("[+] Found " + str(total_files) + " uncompressed elements inside repository.")
-			
+
 			for index, member in enumerate(members):
 				# Safeguard against directory traversal attacks
 				if ".." in member.name or member.name.startswith("/"):
 					print("\n[⚠️] Security Alert: Skipping suspicious block layout: " + member.name)
 					continue
-					
+
 				sys.stdout.write("\r[*] Processing element " + str(index + 1) + "/" + str(total_files) + " -> " + member.name)
 				sys.stdout.flush()
-				
+
 				# Interactive Chunk Hook to prevent memory or pipeline freezes
 				if interactive and member.isreg():
 					print("\n[?] Halt: Next data segment ready (" + str(member.size) + " bytes).")
@@ -65,14 +65,14 @@ def execute(args, global_state):
 					if user_input.strip().lower() == 'q':
 						print("[*] Extraction sequence aborted by user command.")
 						sys.exit(0)
-						
+
 				# Execute strict sequential block write
 				tar.extract(member, path=output_dir)
-				
+
 				# Forced garbage collection loop
 				if index % 50 == 0:
 					gc.collect()
-					
+
 		print("\n[🟢] Success: Container extraction sequence finalized cleanly.")
 	except Exception as e:
 		print("\n[❌] Structural Ingestion Failure: " + str(e))

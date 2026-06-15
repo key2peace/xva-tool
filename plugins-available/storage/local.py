@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Storage - Local File System Target
 
-This module implements the standard file system I/O abstraction layer. 
-It hooks into the storage engine to validate local directories and read/write 
+This module implements the standard file system I/O abstraction layer.
+It hooks into the storage engine to validate local directories and read/write
 raw binary chunks without utilizing external network protocols.
 
 Developer Specifications:
@@ -37,7 +37,7 @@ def stream_chunk(chunk_path, buffer_size):
 	"""Reads and yields binary data chunks efficiently from the local storage layer."""
 	if not os.path.exists(chunk_path):
 		return
-		
+
 	with open(chunk_path, "rb") as fh:
 		while True:
 			data = fh.read(buffer_size)
@@ -52,7 +52,7 @@ def write_chunk(chunk_path, data_bytes):
 		target_dir = os.path.dirname(chunk_path)
 		if target_dir and not os.path.exists(target_dir):
 			os.makedirs(target_dir)
-			
+
 		# Execute strict binary-write block flush
 		with open(chunk_path, "wb") as fh:
 			fh.write(data_bytes)

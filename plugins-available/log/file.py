@@ -37,7 +37,7 @@ def resolve_log_destination(args=None):
 		target_dir = "/var/log"
 	else:
 		target_dir = os.path.expanduser("~/.local/share/xva-tool")
-		
+
 	if not os.path.exists(target_dir):
 		try:
 			os.makedirs(target_dir, 0755)
@@ -53,11 +53,11 @@ def enforce_log_rotation(log_path, max_size_mb=50):
 	"""Checks active size metrics and triggers a clean rollover if limits are breached."""
 	if not os.path.exists(log_path):
 		return
-		
+
 	try:
 		file_size_bytes = os.path.getsize(log_path)
 		max_bytes = max_size_mb * 1024 * 1024
-		
+
 		if file_size_bytes >= max_bytes:
 			# Shift historic logs down the archive chain pipeline
 			backup_path = log_path + ".1"

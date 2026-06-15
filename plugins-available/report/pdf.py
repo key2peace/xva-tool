@@ -55,7 +55,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 
 	pdf_file_path = target_image_path + ".pdf"
 	timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-	
+
 	classification = "INTERNAL ONLY"
 	if args and hasattr(args, "pdf_classification"):
 		classification = args.pdf_classification.upper()
@@ -64,7 +64,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 		# Initialize the monolithic PDF document builder layout frame
 		doc = SimpleDocTemplate(pdf_file_path, pagesize=letter,
 			rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-		
+
 		styles = getSampleStyleSheet()
 		story = []
 
@@ -88,7 +88,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 		# 1. Header Classification Block
 		story.append(Paragraph("<b>CLASSIFICATION: {}</b>".format(classification), meta_style))
 		story.append(Spacer(1, 15))
-		
+
 		# 2. Main Title Layout Segment
 		story.append(Paragraph("XVATOOL INFRASTRUCTURE AUDIT REPORT", title_style))
 		story.append(Paragraph("<b>Verified Integrity Record & System Acquisition Logging Metadata</b>", meta_style))
@@ -104,7 +104,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			["Operating System Core", platform.platform()],
 			["Runtime Process ID (PID)", str(os.getpid())]
 		]
-		
+
 		env_table = Table(env_data, colWidths=[160, 360])
 		env_table.setStyle(TableStyle([
 			('BACKGROUND', (0,0), (1,0), colors.HexColor('#F1F5F9')),
@@ -115,7 +115,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
 			('FONTSIZE', (0,0), (-1,-1), 9),
 		]))
-		
+
 		story.append(Paragraph("<b>1. Environment Acquisition Context</b>", styles['Heading2']))
 		story.append(Spacer(1, 8))
 		story.append(env_table)
@@ -128,7 +128,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			["SHA-1 Engine Block", checksum_dict.get("sha1", "NOT_COMPUTED").upper()],
 			["SHA-256 Crypto Grid", checksum_dict.get("sha256", "NOT_COMPUTED").upper()]
 		]
-		
+
 		hash_table = Table(hash_data, colWidths=[160, 360])
 		hash_table.setStyle(TableStyle([
 			('BACKGROUND', (0,0), (1,0), colors.HexColor('#F1F5F9')),
@@ -139,7 +139,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			('FONTNAME', (0,0), (-1,-1), 'Helvetica-Oblique'),
 			('FONTSIZE', (0,0), (-1,-1), 9),
 		]))
-		
+
 		story.append(Paragraph("<b>2. Cryptographic Integrity Attestation</b>", styles['Heading2']))
 		story.append(Spacer(1, 8))
 		story.append(hash_table)

@@ -34,7 +34,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 	"""Compiles an unassailable JSON descriptor record targeting monitoring pipelines."""
 	report_file_path = target_image_path + ".json"
 	timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-	
+
 	pretty_print = False
 	if args and hasattr(args, "json_pretty"):
 		pretty_print = args.json_pretty

@@ -39,7 +39,7 @@ def dispatch_slack_payload(webhook_url, payload_dict):
 	try:
 		req_headers = {"Content-Type": "application/json"}
 		data_bytes = json.dumps(payload_dict)
-		
+
 		# Invoke pure Python url handlers to bypass command execution security issues completely
 		request = urllib2.Request(webhook_url, data=data_bytes, headers=req_headers)
 		response = urllib2.urlopen(request, timeout=10)
@@ -59,7 +59,7 @@ def trigger_notification(level, event_title, execution_details, args=None):
 	# Check for command line parameters or fall back straight to cascaded configuration states
 	webhook_target = None
 	channel_override = None
-	
+
 	if args:
 		if hasattr(args, "slack_webhook"): webhook_target = args.slack_webhook
 		if hasattr(args, "slack_channel"): channel_override = args.slack_channel

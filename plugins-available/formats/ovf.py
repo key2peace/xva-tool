@@ -31,12 +31,12 @@ def register_arguments(parser):
 
 def get_write_pipeline(target_path, args=None):
 	"""
-	Secure Downstream Pipe Provisioning. Intercepts the core byte stream 
+	Secure Downstream Pipe Provisioning. Intercepts the core byte stream
 	to bundle the data on-the-fly into a compliance OVA distribution container.
 	"""
 	cpu_count = 2
 	ram_size = 2048
-	
+
 	if args:
 		if hasattr(args, "ovf_cpu"): cpu_count = args.ovf_cpu
 		if hasattr(args, "ovf_ram"): ram_size = args.ovf_ram
@@ -74,7 +74,7 @@ def get_write_pipeline(target_path, args=None):
 
 		def wait(self):
 			self.stdin.close()
-			
+
 			if not os.path.exists(self.target_raw):
 				if os.path.exists(self.work_dir):
 					import shutil
@@ -121,7 +121,7 @@ def get_write_pipeline(target_path, args=None):
 			finally:
 				import shutil
 				shutil.rmtree(self.work_dir, ignore_errors=True)
-				
+
 			return self.returncode
 
 	return OVAPipelineWrapper(raw_out_fd, workspace_dir, target_path, cpu_count, ram_size, base_name)

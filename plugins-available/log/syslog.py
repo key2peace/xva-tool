@@ -71,7 +71,7 @@ def send_log_event(level, message, args=None):
 		else:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			sock.sendto(syslog_envelope, (syslog_host, syslog_port))
-			
+
 		sock.close()
 		return True
 	except (socket.error, IOError, OSError):

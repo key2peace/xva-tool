@@ -45,7 +45,7 @@ def get_write_pipeline(target_path, args=None):
 	"""
 	vol_id = "XVA_EXTRACTED_MEDIA"
 	publisher_str = "Alexander Maassen"
-	
+
 	if args:
 		if hasattr(args, 'iso_volume_id'): vol_id = args.iso_volume_id
 		if hasattr(args, 'iso_publisher'): publisher_str = args.iso_publisher
@@ -86,7 +86,7 @@ def get_write_pipeline(target_path, args=None):
 		def wait(self):
 			# 1. Close the active input handle to ensure all blocks are flushed down to disk
 			self.stdin.close()
-			
+
 			if not os.path.exists(self.target_raw) or os.getsize(self.target_raw) < 512:
 				if os.path.exists(self.work_dir): shutil.rmtree(self.work_dir, ignore_errors=True)
 				return 1
@@ -120,7 +120,7 @@ def get_write_pipeline(target_path, args=None):
 				# Append standard El Torito hard disk emulation variables onto the array
 				# Copies the raw drive structure directly inside an embedded compliance segment
 				cmd_array.extend(["-hard-disk-boot", "-b", "disk.img", "-c", "boot.catalog"])
-			
+
 			cmd_array.append(self.work_dir)
 
 			try:
@@ -128,10 +128,10 @@ def get_write_pipeline(target_path, args=None):
 				proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				_, stderr = proc.communicate()
 				self.returncode = proc.returncode
-				
+
 				if proc.returncode != 0:
 					sys.stderr.write("[!] ISO Compilation Binary Error: " + stderr.strip() + "\n")
-					
+
 				# 4. Hybrid post-processing execution phase if applicable
 				if is_bootable and proc.returncode == 0:
 					if any(os.path.isfile(os.path.join(p, "isohybrid")) for p in os.environ.get("PATH", "").split(os.path.pathsep)):
@@ -142,7 +142,7 @@ def get_write_pipeline(target_path, args=None):
 			finally:
 				# Forensically purge all temporary data layers and workspaces from the host system
 				shutil.rmtree(self.work_dir, ignore_errors=True)
-			
+
 			return self.returncode
 
 	return ISOPipelineWrapper(raw_out_fd, workspace_dir, target_path, vol_id, publisher_str)

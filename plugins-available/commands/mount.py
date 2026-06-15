@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Command - Forensic Mount Engine
 
-This module orchestrates virtual filesystem entry points for uncompressed 
-XVA containers. It maps individual 1MB data blocks into a continuous read-only 
+This module orchestrates virtual filesystem entry points for uncompressed
+XVA containers. It maps individual 1MB data blocks into a continuous read-only
 virtual block device wrapper using loop devices or standalone FUSE structures.
 
 Developer Specifications:
@@ -20,7 +20,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 """
 
 import os
@@ -45,7 +45,7 @@ except ImportError:
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the host OS has the 
+	Proactive Environment Check. Verifies if the host OS has the
 	FUSE kernel module loaded and the python-fuse libraries present.
 	"""
 	return FUSE_AVAILABLE and os.path.exists("/dev/fuse")
@@ -68,7 +68,7 @@ class XvaVirtualFileSystem(fuse.Fuse):
 		self.archive_path = None
 		self.virtual_file_name = "disk.img"
 		self.virtual_file_size = 100 * 1024 * 1024 * 1024 # Standard 100GB allocation default
-		
+
 	def getattr(self, path):
 		"""Defines the virtual directory file tree entries and ownership attributes."""
 		st = fuse.Stat()
@@ -144,7 +144,7 @@ def execute(args):
 	# Initialize and configure the operational FUSE server runtime daemon
 	fs = XvaVirtualFileSystem()
 	fs.archive_path = args.archive
-	
+
 	# Pass execution over to the native multi-threaded userspace filesystem mount loop
 	fuse_args = [sys.argv[0], args.target, "-o", "ro"] # Enforce strict read-only compliance
 	if hasattr(args, 'mount_allow_other') and args.mount_allow_other:

@@ -40,11 +40,11 @@ def dispatch_telegram_message(bot_token, chat_id, encoded_text):
 		"parse_mode": "HTML",
 		"disable_web_page_preview": "true"
 	}
-	
+
 	try:
 		req_headers = {"User-Agent": "xva-tool-forensics/1.0"}
 		data_bytes = urllib.urlencode(post_fields)
-		
+
 		request = urllib2.Request(api_url, data=data_bytes, headers=req_headers)
 		response = urllib2.urlopen(request, timeout=10)
 		response.read()
@@ -61,7 +61,7 @@ def send_log_event(level, message, args=None):
 	"""
 	bot_token = None
 	chat_id = None
-	
+
 	if args:
 		if hasattr(args, "telegram_token"): bot_token = args.telegram_token
 		if hasattr(args, "telegram_chat_id"): chat_id = args.telegram_chat_id

@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Command - Container Packaging Engine
 
-This module reverses the extraction sequence by marshaling an active directory 
-of 1MB raw data chunks back into a standardized uncompressed XVA file schema, 
+This module reverses the extraction sequence by marshaling an active directory
+of 1MB raw data chunks back into a standardized uncompressed XVA file schema,
 rebuilding the critical 'ova.xml' header descriptor in the process.
 
 Developer Specifications:
@@ -20,7 +20,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 """
 
 import os
@@ -76,7 +76,7 @@ def execute(args):
 	try:
 		# Open upstream read handles and output write descriptors
 		in_f = open(src_img, "rb")
-		
+
 		# Determine output suffix based on active compression settings
 		out_f = open(target_xva, "wb")
 	except (IOError, OSError) as e:
@@ -91,12 +91,12 @@ def execute(args):
 		'<member><name>name_label</name><value>Recompiled-Image-By-XvaTool</value></member>'
 		'</struct></value>'
 	)
-	
+
 	# Compile a standard USTAR compliant header for the XML file segment
 	xml_header = bytearray(512)
 	struct.pack_into("<100s8s8s8s12s12s", xml_header, 0, "ova.xml", "0000644", "0000000", "0000000", "{:011o}".format(len(fake_xml)), "{:011o}".format(int(time.time())))
 	struct.pack_into("<6s2s", xml_header, 257, "ustar", "00")
-	
+
 	out_f.write(xml_header)
 	out_f.write(fake_xml)
 	# Align block padding bounds up to 512 multiples sequence
@@ -106,7 +106,7 @@ def execute(args):
 
 	print("[*] Entering binaire chunk extraction and streaming compression loops...")
 	chunk_idx = 0
-	
+
 	while True:
 		try:
 			chunk_bytes = in_f.read(chunk_size)
@@ -121,7 +121,7 @@ def execute(args):
 
 			# 3. Compile structural name markers mapping context (e.g. Ref:0/00000000)
 			chunk_filename = "Ref:0/{:08d}".format(chunk_idx)
-			
+
 			# Build standard tar chunk configuration block header
 			header_block = bytearray(512)
 			struct.pack_into("<100s8s8s8s12s12s", header_block, 0, chunk_filename, "0000644", "0000000", "0000000", "{:011o}".format(len(chunk_bytes)), "{:011o}".format(int(time.time())))
@@ -133,7 +133,7 @@ def execute(args):
 				compressed_payload = zlib.compress(chunk_bytes, z_level)
 				# Recalculate size blocks to match compressed output bounds inside headers
 				struct.pack_into("<12s", header_block, 124, "{:011o}".format(len(compressed_payload)))
-				
+
 				out_f.write(header_block)
 				out_f.write(compressed_payload)
 				# Pad the compressed chunk trail cleanly to align blocks
@@ -143,7 +143,7 @@ def execute(args):
 				# Stream raw untouched blocks directly down to the storage array layout
 				out_f.write(header_block)
 				out_f.write(chunk_bytes)
-				
+
 		except (IOError, OSError) as e:
 			sys.stderr.write("[!] Critical streaming write interruption failure: " + str(e) + "\n")
 			break
@@ -152,7 +152,7 @@ def execute(args):
 
 	# 5. Append official USTAR double 512-byte null terminator frames at EOF
 	out_f.write("\0" * 1024)
-	
+
 	in_f.close()
 	out_f.close()
 	print("Success: Compilation sequence finalized cleanly. Output archive locked.")

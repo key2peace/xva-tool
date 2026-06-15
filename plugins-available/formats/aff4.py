@@ -25,12 +25,12 @@ except ImportError:
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the host operating system 
+	Proactive Environment Check. Verifies if the host operating system
 	has either the pyaff4 python module or the system-level 'aff4imager' binary.
 	"""
 	if AFF4_AVAILABLE:
 		return True
-		
+
 	binary_name = "aff4imager"
 	path_env = os.environ.get("PATH", "")
 	for path_dir in path_env.split(os.path.pathsep):
@@ -50,12 +50,12 @@ def register_arguments(parser):
 
 def get_write_pipeline(target_path, args=None):
 	"""
-	Secure Downstream Pipe Provisioning. Launches aff4imager enforcing 
+	Secure Downstream Pipe Provisioning. Launches aff4imager enforcing
 	strict array-string parameters to banish command injection vulnerabilities.
 	"""
 	comp_tier = "lz4"
 	thread_limit = "2"
-	
+
 	if args:
 		if hasattr(args, "aff4_compression"): comp_tier = args.aff4_compression
 		if hasattr(args, "aff4_threads"): thread_limit = str(args.aff4_threads)

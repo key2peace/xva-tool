@@ -9,8 +9,8 @@
 """
 XVA-TOOL Plugin: Command - Forensic Block Rescue Engine
 
-This module executes low-level byte carving and alignment repairs over 
-damaged or incomplete uncompressed XVA containers. It intercepts corrupt 
+This module executes low-level byte carving and alignment repairs over
+damaged or incomplete uncompressed XVA containers. It intercepts corrupt
 headers to recover isolated data fragments and enforce data reconstruction.
 
 Developer Specifications:
@@ -20,7 +20,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 """
 
 import os
@@ -75,14 +75,14 @@ def execute(args):
 		from xvatool import execute_merge_engine
 		# Force rescue mode and pass down command constraints parameters
 		success = execute_merge_engine(
-			args.archive, args.target, 
+			args.archive, args.target,
 			force_flag=args.force, resume_flag=args.resume, rescue_mode=True
 		)
-		
+
 		if success:
 			print("Success: Salvage run finalized. Consult the mapfile for corruption health reports.")
 		sys.exit(0 if success else 1)
-		
+
 	except ImportError:
 		sys.stderr.write("[!] Core Engine Missing: Failed to bind command to the execution stream.\n")
 		sys.exit(1)

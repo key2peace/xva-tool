@@ -34,7 +34,7 @@ def dispatch_discord_payload(webhook_url, payload_dict):
 	try:
 		req_headers = {"Content-Type": "application/json", "User-Agent": "xva-tool-forensics/1.0"}
 		data_bytes = json.dumps(payload_dict)
-		
+
 		request = urllib2.Request(webhook_url, data=data_bytes, headers=req_headers)
 		response = urllib2.urlopen(request, timeout=10)
 		response.read()

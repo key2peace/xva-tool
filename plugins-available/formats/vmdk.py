@@ -17,12 +17,12 @@ import subprocess
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the 'qemu-img' subsystem 
+	Proactive Environment Check. Verifies if the 'qemu-img' subsystem
 	is accessible on the host machine to compile VMDK descriptor envelopes.
 	"""
 	binary_name = "qemu-img"
 	path_env = os.environ.get("PATH", "")
-	
+
 	for path_dir in path_env.split(os.path.pathsep):
 		candidate_path = os.path.join(path_dir, binary_name)
 		if os.path.isfile(candidate_path) and os.access(candidate_path, os.X_OK):
@@ -33,20 +33,20 @@ def is_supported():
 def register_arguments(parser):
 	"""Attaches VMware specific sub-format constraints to the central engine parser."""
 	group = parser.add_argument_group("VMware VMDK Format Options")
-	group.add_argument("--vmdk-subformat", choices=["monolithicFlat", "streamOptimized", "sparse"], 
+	group.add_argument("--vmdk-subformat", choices=["monolithicFlat", "streamOptimized", "sparse"],
 		default="monolithicFlat", help="Enforce a specific underlying VMware cluster allocation map")
 
 
 def get_write_pipeline(target_path, args=None):
 	"""
-	Secure Downstream Pipe Provisioning. Launches the pipeline using 
+	Secure Downstream Pipe Provisioning. Launches the pipeline using
 	string-array arguments to completely eliminate shell injection capabilities.
 	"""
 	subformat = "monolithicFlat"
 	if args and hasattr(args, 'vmdk_subformat'):
 		subformat = args.vmdk_subformat
 
-	# Enforce secure list formatting targeting subprocess initialization 
+	# Enforce secure list formatting targeting subprocess initialization
 	cmd_array = [
 		"qemu-img", "convert",
 		"-f", "raw",

@@ -22,7 +22,7 @@ def is_supported():
 	"""
 	binary_name = "zstd"
 	path_env = os.environ.get("PATH", "")
-	
+
 	for path_dir in path_env.split(os.path.pathsep):
 		candidate_path = os.path.join(path_dir, binary_name)
 		if os.path.isfile(candidate_path) and os.access(candidate_path, os.X_OK):
@@ -46,7 +46,7 @@ def get_write_pipeline(target_path, args=None):
 	"""
 	z_level = "3"
 	z_threads = "0"
-	
+
 	if args:
 		if hasattr(args, 'zstd_level'): z_level = str(args.zstd_level)
 		if hasattr(args, 'zstd_threads'): z_threads = str(args.zstd_threads)

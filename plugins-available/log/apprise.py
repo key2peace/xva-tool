@@ -46,7 +46,7 @@ def dispatch_apprise_alert(apprise_urls_list, level, message):
 	try:
 		# Initialize the native Apprise orchestration asset controller instance
 		obj = apprise.Apprise()
-		
+
 		# Register the array of target push providers strings
 		for target_url in apprise_urls_list:
 			obj.add(target_url)
@@ -61,7 +61,7 @@ def dispatch_apprise_alert(apprise_urls_list, level, message):
 		notify_type = type_map.get(level.lower(), apprise.NotifyType.INFO)
 
 		title_string = "XVATOOL EVENT ALERT: " + level.upper()
-		
+
 		# Execute the dynamic multi-channel broadcast transaction
 		obj.send(
 			body=message,

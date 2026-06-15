@@ -31,12 +31,12 @@ def register_arguments(parser):
 
 def compile_report(target_image_path, checksum_dict, args=None):
 	"""
-	Generates a fully self-contained HTML5 diagnostic asset file 
+	Generates a fully self-contained HTML5 diagnostic asset file
 	directly alongside the extracted volume output path.
 	"""
 	report_file_path = target_image_path + ".html"
 	timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-	
+
 	page_title = "xva-tool Storage Extraction Report"
 	if args and hasattr(args, "html_title"):
 		page_title = args.html_title
@@ -47,7 +47,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			hf.write("\t<meta charset=\"UTF-8\">\n")
 			hf.write("\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n")
 			hf.write("\t<title>{}</title>\n".format(page_title))
-			
+
 			# Embed thin responsive CSS rules directly into the file layout bounds
 			hf.write("\t<style>\n")
 			hf.write("\t\tbody { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f9; color: #333; margin: 0; padding: 20px; }\n")
@@ -64,17 +64,17 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			hf.write("\t\t.badge-success { background: #10b981; }\n")
 			hf.write("\t\t.footer { text-align: center; color: #94a3b8; font-size: 12px; margin-top: 4px; padding-top: 20px; border-top: 1px solid #e5e7eb; }\n")
 			hf.write("\t</style>\n</head>\n<body>\n")
-			
+
 			hf.write("<div class=\"container\">\n")
 			hf.write("\t<h1>💾 Storage Extraction Matrix Analytics</h1>\n")
-			
+
 			# Render tracking metrics overview summary row cards
 			hf.write("\t<div class=\"grid-metrics\">\n")
 			hf.write("\t\t<div class=\"card\"><h3>Status</h3><p><span class=\"badge badge-success\">SUCCESS</span></p></div>\n")
 			hf.write("\t\t<div class=\"card\"><h3>Target Image</h3><p>{}</p></div>\n".format(os.path.basename(target_image_path)))
 			hf.write("\t\t<div class=\"card\"><h3>Verification Date</h3><p>{}</p></div>\n".format(timestamp))
 			hf.write("\t</div>\n")
-			
+
 			# Render detailed administrative system metadata listings
 			hf.write("\t<h2>📋 Execution Environment Details</h2>\n")
 			hf.write("\t<table>\n")
@@ -84,7 +84,7 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			hf.write("\t\t<tr><td>Operating System Kernel</td><td>{}</td></tr>\n".format(platform.platform()))
 			hf.write("\t\t<tr><td>Execution Process ID (PID)</td><td>{}</td></tr>\n".format(os.getpid()))
 			hf.write("\t</table>\n")
-			
+
 			# Render cryptographic forensic check tables
 			hf.write("\t<h2>🔒 Cryptographic Validation Checksums</h2>\n")
 			hf.write("\t<table>\n")
@@ -93,11 +93,11 @@ def compile_report(target_image_path, checksum_dict, args=None):
 			hf.write("\t\t<tr><td><b>SHA-1</b></td><td><code>{}</code></td></tr>\n".format(checksum_dict.get("sha1", "NOT_COMPUTED").upper()))
 			hf.write("\t\t<tr><td><b>SHA-256</b></td><td><code>{}</code></td></tr>\n".format(checksum_dict.get("sha256", "NOT_COMPUTED").upper()))
 			hf.write("\t</table>\n")
-			
+
 			hf.write("\t<div class=\"footer\">Orchestration Engine Core designed and maintained by Alexander Maassen &lt;outsider@cuci.nl&gt;</div>\n")
 			hf.write("</div>\n")
 			hf.write("</body>\n</html>\n")
-			
+
 		return True
 	except (IOError, OSError) as e:
 		sys.stderr.write("[!] HTML Reporting Engine Failure: " + str(e) + "\n")

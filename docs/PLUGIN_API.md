@@ -8,8 +8,8 @@ Welcome to the automated plugin reference. This documentation is generated direc
 ```text
 XVA-TOOL Plugin: Command - Container Extraction Engine
 
-This module implements the low-level extraction process for uncompressed 
-XVA containers. It processes the internal tarball stream, extracts individual 
+This module implements the low-level extraction process for uncompressed
+XVA containers. It processes the internal tarball stream, extracts individual
 1MB binary disk segments sequentially, and recreates the path layouts.
 
 Developer Specifications:
@@ -26,8 +26,8 @@ Developer Specifications:
 ```text
 XVA-TOOL Plugin: Command - Information Extraction
 
-This module implements the structural metadata analysis for uncompressed 
-XVA containers. It hooks into the main execution cycle to parse the leading 
+This module implements the structural metadata analysis for uncompressed
+XVA containers. It hooks into the main execution cycle to parse the leading
 'ova.xml' descriptor without executing a full container extraction loop.
 
 Developer Specifications:
@@ -37,7 +37,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 ```
 ---
 
@@ -48,16 +48,16 @@ Exposed Variables:
 ```text
 XVA-TOOL Plugin: Command - Zero-Copy Block Merge Engine
 
-This module contains the core streaming loop responsible for rebuilding 
-uncompressed 1MB chunk configurations into a unified, flat raw disk image (.raw). 
+This module contains the core streaming loop responsible for rebuilding
+uncompressed 1MB chunk configurations into a unified, flat raw disk image (.raw).
 It respects memory boundaries mapped out during the core bootstrap phase.
 
 Developer Specifications:
     - Entry Hook: Triggers binary data rebuilding loops over extracted folders.
-    - Memory Boundaries: Automatically scales block caching arrays from 1MB 
-                         (SPARSE_MODE) up to 32MB chunks (PERFORMANCE_MODE).
-    - I/O Hardening: Utilizes explicit garbage collection loops and strict 
-                     sequential chunk resolution to guarantee absolute stability.
+    - Memory Boundaries: Automatically scales block caching arrays from 1MB
+			 (SPARSE_MODE) up to 32MB chunks (PERFORMANCE_MODE).
+    - I/O Hardening: Utilizes explicit garbage collection loops and strict
+		     sequential chunk resolution to guarantee absolute stability.
 ```
 ---
 
@@ -68,8 +68,8 @@ Developer Specifications:
 ```text
 XVA-TOOL Plugin: Command - Container Packaging Engine
 
-This module reverses the extraction sequence by marshaling an active directory 
-of 1MB raw data chunks back into a standardized uncompressed XVA file schema, 
+This module reverses the extraction sequence by marshaling an active directory
+of 1MB raw data chunks back into a standardized uncompressed XVA file schema,
 rebuilding the critical 'ova.xml' header descriptor in the process.
 
 Developer Specifications:
@@ -79,7 +79,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 ```
 ---
 
@@ -90,8 +90,8 @@ Exposed Variables:
 ```text
 XVA-TOOL Plugin: Command - Forensic Block Rescue Engine
 
-This module executes low-level byte carving and alignment repairs over 
-damaged or incomplete uncompressed XVA containers. It intercepts corrupt 
+This module executes low-level byte carving and alignment repairs over
+damaged or incomplete uncompressed XVA containers. It intercepts corrupt
 headers to recover isolated data fragments and enforce data reconstruction.
 
 Developer Specifications:
@@ -101,7 +101,7 @@ Developer Specifications:
 
 Exposed Variables:
     - pl (dict): System metadata tracking array containing module type,
-                 classification name, and CLI help bindings.
+		 classification name, and CLI help bindings.
 ```
 ---
 
@@ -130,7 +130,7 @@ Pipes and compresses raw block streams into legally sound EnCase evidence files.
 
 ### Developer Specifications
 ```text
-Dynamic QCOW2 stream format extension module. 
+Dynamic QCOW2 stream format extension module.
 Pipes raw block clusters on-the-fly into qemu-img without local caching.
 ```
 ---
@@ -262,15 +262,15 @@ Generates structured, compliance-ready XML nodes tracking core data execution st
 ```text
 XVA-TOOL Plugin: Storage - Enterprise iSCSI Target Handler
 
-This module orchestrates remote raw block storage streams straight from 
-iSCSI Storage Area Networks (SAN). It wraps around system 'iscsiadm' loops 
+This module orchestrates remote raw block storage streams straight from
+iSCSI Storage Area Networks (SAN). It wraps around system 'iscsiadm' loops
 to detect, log in, and expose remote LUN targets as local block devices.
 
 Developer Specifications:
     - Module Class: storage
     - System Dependencies: open-iscsi package binary availability.
-    - Security Isolation: Requires careful execution context separation 
-                           to prevent credential leakages into logs.
+    - Security Isolation: Requires careful execution context separation
+			   to prevent credential leakages into logs.
 ```
 ---
 
@@ -281,8 +281,8 @@ Developer Specifications:
 ```text
 XVA-TOOL Plugin: Storage - Local File System Target
 
-This module implements the standard file system I/O abstraction layer. 
-It hooks into the storage engine to validate local directories and read/write 
+This module implements the standard file system I/O abstraction layer.
+It hooks into the storage engine to validate local directories and read/write
 raw binary chunks without utilizing external network protocols.
 
 Developer Specifications:
@@ -301,4 +301,3 @@ Dynamic USB/Raw block flash transport module.
 Enforces strict multi-tier mount verification and direct kernel O_DIRECT writes.
 ```
 ---
-

@@ -18,12 +18,12 @@ import shutil
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the standard Linux FUSE 
+	Proactive Environment Check. Verifies if the standard Linux FUSE
 	sshfs utility binary is fully discoverable and executable.
 	"""
 	binary_name = "sshfs"
 	path_env = os.environ.get("PATH", "")
-	
+
 	for path_dir in path_env.split(os.path.pathsep):
 		candidate_path = os.path.join(path_dir, binary_name)
 		if os.path.isfile(candidate_path) and os.access(candidate_path, os.X_OK):
@@ -46,7 +46,7 @@ def parse_sftp_uri(uri_string):
 	Extracts and isolates credentials from the physical resource string.
 	"""
 	clean_uri = uri_string.replace("sftps://", "").replace("sshfs://", "")
-	
+
 	# Extract remote target path layout
 	if "/" not in clean_uri:
 		return None, None, None
@@ -111,7 +111,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 		# SSH options must be passed individually via standard -o token formatting rules
 		for opt in ssh_opts.split(","):
 			options_extended.append("o={}".format(opt))
-			
+
 	if options_extended:
 		for opt_entry in options_extended:
 			cmd_array.extend(["-o", opt_entry])
@@ -120,14 +120,14 @@ def prepare_storage(uri_string, args=None, read_only=False):
 		# Engage userspace background mounting procedures
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		_, stderr = proc.communicate()
-		
+
 		if proc.returncode != 0:
 			sys.stderr.write("[!] SFTP SSHFS Layer Mount Failed: " + stderr.strip() + "\n")
 			sys.stderr.write("[*] Note: Ensure passwordless SSH public-key entry constraints are verified.\n")
 			if os.path.exists(tmp_mountpoint):
 				os.rmdir(tmp_mountpoint)
 			return None
-			
+
 		return tmp_mountpoint
 	except (OSError, ValueError) as e:
 		sys.stderr.write("[!] SFTP Mount Execution Abruptly Aborted: " + str(e) + "\n")
@@ -147,7 +147,7 @@ def cleanup_storage(local_mountpoint):
 	try:
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc.communicate()
-		
+
 		# Clear outstanding remnants from filesystem workspace scopes
 		if os.path.exists(local_mountpoint):
 			shutil.rmtree(local_mountpoint, ignore_errors=True)

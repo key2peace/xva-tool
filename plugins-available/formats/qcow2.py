@@ -7,7 +7,7 @@
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
 """
-Dynamic QCOW2 stream format extension module. 
+Dynamic QCOW2 stream format extension module.
 Pipes raw block clusters on-the-fly into qemu-img without local caching.
 """
 
@@ -17,12 +17,12 @@ import subprocess
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the 'qemu-img' system 
+	Proactive Environment Check. Verifies if the 'qemu-img' system
 	binary is fully discoverable and executable within the OS PATH.
 	"""
 	binary_name = "qemu-img"
 	path_env = os.environ.get("PATH", "")
-	
+
 	for path_dir in path_env.split(os.path.pathsep):
 		candidate_path = os.path.join(path_dir, binary_name)
 		if os.path.isfile(candidate_path) and os.access(candidate_path, os.X_OK):
@@ -41,12 +41,12 @@ def register_arguments(parser):
 
 def get_write_pipeline(target_path, args=None):
 	"""
-	Secure Downstream Pipe Provisioning. Launches qemu-img convert 
+	Secure Downstream Pipe Provisioning. Launches qemu-img convert
 	enforcing strict array-string parameters to banish command injection vulnerabilities.
 	"""
 	compat_version = "1.1"
 	cluster_size = "65536"
-	
+
 	if args:
 		if hasattr(args, 'qcow2_compat'): compat_version = args.qcow2_compat
 		if hasattr(args, 'qcow2_cluster_size'): cluster_size = str(args.qcow2_cluster_size)

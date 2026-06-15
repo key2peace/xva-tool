@@ -16,7 +16,7 @@ import sys
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the operating system 
+	Proactive Environment Check. Verifies if the operating system
 	exposes access to native block storage device trees inside /dev.
 	"""
 	return os.path.exists("/dev") and hasattr(os, "O_DIRECT")
@@ -31,14 +31,14 @@ def register_arguments(parser):
 
 def verify_device_safety(device_path):
 	"""
-	Executes rigorous background checks against /proc/mounts to verify 
+	Executes rigorous background checks against /proc/mounts to verify
 	that no logical partition on the target physical storage is actively mounted.
 	"""
 	if not device_path.startswith("/dev/"):
 		return False
 
 	base_device = os.path.basename(device_path)
-	
+
 	try:
 		if os.path.exists("/proc/mounts"):
 			with open("/proc/mounts", "r") as f:
@@ -47,7 +47,7 @@ def verify_device_safety(device_path):
 					if not parts:
 						continue
 					mount_source = parts[0]
-					
+
 					# Intercept if the device identifier matches any mounted node
 					if base_device in mount_source:
 						sys.stderr.write("[!] CRITICAL ACCESSIBILITY ALERT: Target drive block is currently active inside the OS!\n")
@@ -84,9 +84,9 @@ def get_direct_write_handle(device_path, args=None):
 		# os.O_DIRECT: Completely bypasses the Linux kernel page cache memory pools
 		# os.O_SYNC: Enforces immediate physical sector level cache flushes
 		flags = os.O_WRONLY | os.O_DIRECT | os.O_SYNC
-		
+
 		fd = os.open(device_path, flags)
-		
+
 		# Define a basic Stream Wrapper Object mimicking standard file objects to return to the core
 		class DirectIOBlockStreamWrapper(object):
 			def __init__(self, raw_fd, b_size):
@@ -97,13 +97,13 @@ def get_direct_write_handle(device_path, args=None):
 			def write(self, binary_payload):
 				"""Writes data ensuring alignment bounds conform to O_DIRECT parameters."""
 				payload_len = len(binary_payload)
-				
+
 				# Ensure incoming memory addresses line up precisely with kernel constraints
 				if payload_len % self.block_size != 0:
 					# Pad trailing remnants with binary null bytes to preserve grid boundaries
 					padding_needed = self.block_size - (payload_len % self.block_size)
 					binary_payload += "\0" * padding_needed
-				
+
 				try:
 					os.write(self.fd, binary_payload)
 					return True

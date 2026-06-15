@@ -18,7 +18,7 @@ import shutil
 
 def is_supported():
 	"""
-	Proactive Environment Check. Verifies if the standard Linux 
+	Proactive Environment Check. Verifies if the standard Linux
 	mount utility and NFS mount helper binaries are available.
 	"""
 	return os.path.exists("/sbin/mount.nfs") or os.path.exists("/sbin/mount.nfs4")
@@ -38,7 +38,7 @@ def parse_nfs_uri(uri_string):
 	clean_uri = uri_string.replace("nfs4://", "").replace("nfs://", "")
 	if "/" not in clean_uri:
 		return None, None
-	
+
 	host, export_path = clean_uri.split("/", 1)
 	return host, "/" + export_path
 
@@ -60,14 +60,14 @@ def prepare_storage(uri_string, args=None, read_only=False):
 
 	nfs_ver = "auto"
 	nfs_opts = "nolock,tcp,rsize=1048576,wsize=1048576"
-	
+
 	if args:
 		if hasattr(args, 'nfs_version'): nfs_ver = args.nfs_version
 		if hasattr(args, 'nfs_options'): nfs_opts = args.nfs_options
 
 	# Assemble the strict argument list parameters array to block injections
 	cmd_array = ["mount", "-t", "nfs"]
-	
+
 	options_list = []
 	if nfs_ver != "auto":
 		options_list.append("nfsvers={}".format(nfs_ver))
@@ -75,7 +75,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 		options_list.append("ro")
 	if nfs_opts:
 		options_list.append(nfs_opts)
-		
+
 	if options_list:
 		cmd_array.extend(["-o", ",".join(options_list)])
 
@@ -86,13 +86,13 @@ def prepare_storage(uri_string, args=None, read_only=False):
 		# Engage kernel mounting subsystem sequence
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		_, stderr = proc.communicate()
-		
+
 		if proc.returncode != 0:
 			sys.stderr.write("[!] NFS Mount Execution Failed: " + stderr.strip() + "\n")
 			if os.path.exists(tmp_mountpoint):
 				os.rmdir(tmp_mountpoint)
 			return None
-			
+
 		return tmp_mountpoint
 	except (OSError, ValueError) as e:
 		sys.stderr.write("[!] NFS Mount Trigger Crash Exception: " + str(e) + "\n")
@@ -112,7 +112,7 @@ def cleanup_storage(local_mountpoint):
 	try:
 		proc = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc.communicate()
-		
+
 		# Post-unmount forensic safety clearance sweep
 		if os.path.exists(local_mountpoint):
 			shutil.rmtree(local_mountpoint, ignore_errors=True)
