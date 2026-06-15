@@ -375,7 +375,7 @@ def draw_retro_tui(stdscr, menu_items):
 			current_row -= 1
 		elif key == curses.KEY_DOWN and current_row < len(display_items) - 1:
 			current_row += 1
-		elif key == curses.KEY_ENTER or key in:
+		elif key == curses.KEY_ENTER:
 			return display_items[current_row]
 		elif key == curses.KEY_F1 or key == ord('h'):
 			# F1 Key Hook placeholder for the dynamic Markdown rendering routing loop
