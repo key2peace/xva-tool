@@ -7,13 +7,31 @@
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
 """
-Dynamic info command extension module.
-Parses the structural ova.xml map directly out of the stream context via streams.
+XVA-TOOL Plugin: Command - Information Extraction
+
+This module implements the structural metadata analysis for uncompressed 
+XVA containers. It hooks into the main execution cycle to parse the leading 
+'ova.xml' descriptor without executing a full container extraction loop.
+
+Developer Specifications:
+    - Entry Hook: Execute command invocation with parsed namespace arguments.
+    - Expected State: Valid read-binary descriptor targeting a local target file.
+    - Thread Behavior: O(1) synchronous metadata block extraction.
+
+Exposed Variables:
+    - pl (dict): System metadata tracking array containing module type,
+                 classification name, and CLI help bindings.
 """
 
 import os
 import sys
 import xml.etree.ElementTree as ET
+
+pl = {
+	"name": "info",
+	"type": "commands",
+	"help": "Extract and display structural XML metadata from a target XVA container."
+}
 
 def is_supported():
 	"""Proactive Environment Check. Always returns True as it relies on core Python."""

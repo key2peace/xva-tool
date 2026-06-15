@@ -7,13 +7,29 @@
 #  Licensed under the terms of the MIT License (See LICENSE.md in root)
 # ==============================================================================
 """
-Dynamic iSCSI storage transport extension module.
-Automates secure target discovery, session logging, and bare-metal block stream piping.
+XVA-TOOL Plugin: Storage - Enterprise iSCSI Target Handler
+
+This module orchestrates remote raw block storage streams straight from 
+iSCSI Storage Area Networks (SAN). It wraps around system 'iscsiadm' loops 
+to detect, log in, and expose remote LUN targets as local block devices.
+
+Developer Specifications:
+    - Module Class: storage
+    - System Dependencies: open-iscsi package binary availability.
+    - Security Isolation: Requires careful execution context separation 
+                           to prevent credential leakages into logs.
 """
 
 import os
 import sys
 import subprocess
+
+# The Plugin Metadata Dictionary - Placed strictly below core imports
+pl = {
+	"name": "iscsi",
+	"type": "storage",
+	"help": "Stream raw container blocks directly from an enterprise remote iSCSI target LUN."
+}
 
 def is_supported():
 	"""

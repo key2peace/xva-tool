@@ -11,6 +11,24 @@
 # ==============================================================================
 #  Core Framework Infrastructure Logic Layer (Python 2.7 Environment)
 # ==============================================================================
+"""
+XVA-TOOL - Core Execution & Zero-Copy Streaming Engine
+
+This is the primary execution runtime of the xva-tool framework. It handles 
+the initial environment bootstrap, configuration cascading from 'xva-tool.conf', 
+advisory file locking enforcement via fcntl, and low-level chunk streaming logic.
+
+Core Architecture Hooks:
+    - global_file_handles (dict): Active binary IO descriptors mapped to disk offsets.
+    - active_profile (str): Defines memory buffer boundaries (SPARSE / PERFORMANCE).
+    - register_arguments(parser): Main entrypoint for CLI argument collection.
+
+Lifecycle Handshakes:
+    1. Bootstrap: Validates runtime variables, sets up local environment loops.
+    2. Initialization: Parses cascading configs, validates raw lock descriptors.
+    3. Plugin Resolution: Dynamically resolves active modules via __import__.
+    4. Execution: Passes execution flow into the resolved functional command array.
+"""
 
 import argparse
 import os
