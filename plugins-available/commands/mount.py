@@ -1,19 +1,38 @@
-#!/usr/bin/python
+# ==============================================================================
+#      XVA-TOOL PLUGIN - COMMAND: MOUNT ENGINE
+#      Orchestrates VFS entry points and block device virtualization loops.
+#
+#      Developed and maintained by Alexander Maassen and Google's Gemini AI.
+#      Licensed under the terms of the MIT License.
+# ==============================================================================
 # -*- coding: utf-8 -*-
-# ==============================================================================
-#  XVAPLUGIN - Live FUSE (Filesystem in Userspace) On-The-Fly Mount Engine
-# ==============================================================================
-#  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
-#  Licensed under the terms of the MIT License (See LICENSE.md in root)
-# ==============================================================================
 """
-Dynamic FUSE command extension module.
-Mounts uncompressed XVA tarballs instantaneously as virtual raw loop devices.
+XVA-TOOL Plugin: Command - Forensic Mount Engine
+
+This module orchestrates virtual filesystem entry points for uncompressed 
+XVA containers. It maps individual 1MB data blocks into a continuous read-only 
+virtual block device wrapper using loop devices or standalone FUSE structures.
+
+Developer Specifications:
+    - Entry Hook: Execute filesystem mount sequence onto a target path layout.
+    - Integrity Layer: Enforces strict read-only parameters to block data mutation.
+    - Platform Bounds: Integrates closely with system storage subsystems.
+
+Exposed Variables:
+    - pl (dict): System metadata tracking array containing module type,
+                 classification name, and CLI help bindings.
 """
 
 import os
 import sys
 import errno
+
+# The Plugin Metadata Dictionary - Placed strictly below core imports
+pl = {
+	"name": "mount",
+	"type": "commands",
+	"help": "Mount an uncompressed XVA container dynamically as a read-only VFS block device."
+}
 
 # Track if optional python-fuse bindings are discoverable in the active environment
 FUSE_AVAILABLE = False

@@ -1,18 +1,37 @@
-#!/usr/bin/python
+# ==============================================================================
+#      XVA-TOOL PLUGIN - COMMAND: RESCUE ENGINE
+#      Executes deep forensic stream carving over corrupted block layouts.
+#
+#      Developed and maintained by Alexander Maassen and Google's Gemini AI.
+#      Licensed under the terms of the MIT License.
+# ==============================================================================
 # -*- coding: utf-8 -*-
-# ==============================================================================
-#  XVATOOL PLUGIN - Advanced GNU ddrescue-inspired Data Recovery Engine
-# ==============================================================================
-#  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
-#  Licensed under the terms of the MIT License (See LICENSE.md in root)
-# ==============================================================================
 """
-Dynamic rescue command extension module.
-Orchestrates non-destructive block-level skipping over degraded storage arrays.
+XVA-TOOL Plugin: Command - Forensic Block Rescue Engine
+
+This module executes low-level byte carving and alignment repairs over 
+damaged or incomplete uncompressed XVA containers. It intercepts corrupt 
+headers to recover isolated data fragments and enforce data reconstruction.
+
+Developer Specifications:
+    - Entry Hook: Initiates stream carving and structural integrity validation.
+    - Resiliency Focus: Bypasses native EOF dropouts to extract orphan segments.
+    - Audit Trail: Forces precise positional error capturing inside local logs.
+
+Exposed Variables:
+    - pl (dict): System metadata tracking array containing module type,
+                 classification name, and CLI help bindings.
 """
 
 import os
 import sys
+
+# The Plugin Metadata Dictionary - Placed strictly below core imports
+pl = {
+	"name": "rescue",
+	"type": "commands",
+	"help": "Carve, salvage, and recover uncompressed data blocks from damaged containers."
+}
 
 def is_supported():
 	"""Proactive Environment Check. Always returns True as it relies on core Python."""

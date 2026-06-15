@@ -1,14 +1,26 @@
-#!/usr/bin/python
+# ==============================================================================
+#      XVA-TOOL PLUGIN - COMMAND: PACK ENGINE
+#      Assembles raw block directories back into standard uncompressed archives.
+#
+#      Developed and maintained by Alexander Maassen and Google's Gemini AI.
+#      Licensed under the terms of the MIT License.
+# ==============================================================================
 # -*- coding: utf-8 -*-
-# ==============================================================================
-#  XVATOOL PLUGIN - High-Performance Streaming XVA Compressor Engine
-# ==============================================================================
-#  Copyright (c) 2026 Alexander Maassen <outsider@cuci.nl>
-#  Licensed under the terms of the MIT License (See LICENSE.md in root)
-# ==============================================================================
 """
-Dynamic pack command extension module.
-Re-compiles raw disk boundaries back into sparse compressed XenServer tarballs.
+XVA-TOOL Plugin: Command - Container Packaging Engine
+
+This module reverses the extraction sequence by marshaling an active directory 
+of 1MB raw data chunks back into a standardized uncompressed XVA file schema, 
+rebuilding the critical 'ova.xml' header descriptor in the process.
+
+Developer Specifications:
+    - Entry Hook: Compiles specific block arrays into target package envelopes.
+    - Layout Hardening: Asserts chronological indexing integrity per data stream.
+    - Performance Layer: Synchronizes block tracking states with memory boundary profiles.
+
+Exposed Variables:
+    - pl (dict): System metadata tracking array containing module type,
+                 classification name, and CLI help bindings.
 """
 
 import os
@@ -16,6 +28,13 @@ import sys
 import tarfile
 import zlib
 import io
+
+# The Plugin Metadata Dictionary - Placed strictly below core imports
+pl = {
+	"name": "pack",
+	"type": "commands",
+	"help": "Assemble and seal a raw directory of chunks back into a deployment XVA container."
+}
 
 def is_supported():
 	"""Proactive Environment Check. Always returns True as it uses pure Python core modules."""
