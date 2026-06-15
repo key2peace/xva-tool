@@ -56,7 +56,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 	# Allocate a secure local randomized transaction target directory
 	tmp_mountpoint = "/tmp/xvatool_nfs_{}_{}".format(host, os.getpid())
 	if not os.path.exists(tmp_mountpoint):
-		os.makedirs(tmp_mountpoint, 0700)
+		os.makedirs(tmp_mountpoint, 448)
 
 	nfs_ver = "auto"
 	nfs_opts = "nolock,tcp,rsize=1048576,wsize=1048576"

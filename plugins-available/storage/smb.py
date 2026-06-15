@@ -80,7 +80,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 	pid = os.getpid()
 	tmp_mountpoint = "/tmp/xvatool_smb_{}_{}".format(pid, host)
 	if not os.path.exists(tmp_mountpoint):
-		os.makedirs(tmp_mountpoint, 0700)
+		os.makedirs(tmp_mountpoint, 448)
 
 	# Security Guard: Write credentials to a separate 0600 file to hide passwords from ps aux
 	cred_file = "/tmp/xvatool_smb_cred_{}".format(pid)

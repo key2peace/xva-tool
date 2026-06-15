@@ -92,7 +92,7 @@ def prepare_storage(uri_string, args=None, read_only=False):
 	pid = os.getpid()
 	tmp_mountpoint = "/tmp/xvatool_sftp_{}_{}".format(pid, user_host.replace("@", "_"))
 	if not os.path.exists(tmp_mountpoint):
-		os.makedirs(tmp_mountpoint, 0700)
+		os.makedirs(tmp_mountpoint, 448)
 
 	# Construct strict array presentation layout parameters to fully seal injection flaws
 	cmd_array = [
