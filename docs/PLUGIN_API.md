@@ -125,6 +125,26 @@ Pipes and compresses raw block streams into legally sound EnCase evidence files.
 ```
 ---
 
+## iso (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic ISO compilation format extension module.
+Evaluates Sector 0 binary structures on-the-fly to trigger El Torito boot emulation.
+```
+---
+
+## ovf (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic OVF/OVA conversion format extension module.
+Wraps raw disk allocations alongside generated OVF XML descriptors into USTAR tarballs.
+```
+---
+
 ## qcow2 (`unknown`)
 **Summary:** No help text provided.
 
@@ -172,6 +192,16 @@ Pipes raw block clusters on-the-fly through multi-threaded zstd binaries.
 ```text
 Dynamic Apprise logging and notification hub extension module.
 Lazy-loads the apprise library backend to grant access to 80+ alerting endpoints.
+```
+---
+
+## file (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic local file logging extension module.
+Handles automated permission downgrades and runtime file rotation size limits.
 ```
 ---
 
@@ -309,6 +339,16 @@ Automates secure kernel space mount routing abstractions with forensic cleanup.
 ```text
 Dynamic SFTP network transport extension module using SSHFS FUSE.
 Automates secure encrypted storage routing abstractions with signal cleanup guards.
+```
+---
+
+## smb (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic SMB/Samba network transport extension module.
+Automates secure CIFS kernel mounts with credentials isolation and forensic cleanup.
 ```
 ---
 
