@@ -79,4 +79,3 @@ if __name__ == "__main__":
 		print("[*] Launching xva-tool Layout Linter & Fixer (Full Scan)...")
 		execute_repository_scan()
 		print("[+] Repository style compliance unified successfully.")
-
