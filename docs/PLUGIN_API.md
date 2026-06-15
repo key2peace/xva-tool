@@ -292,6 +292,26 @@ Developer Specifications:
 ```
 ---
 
+## nfs (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic NFS network transport extension module.
+Automates secure kernel space mount routing abstractions with forensic cleanup.
+```
+---
+
+## sftp (`unknown`)
+**Summary:** No help text provided.
+
+### Developer Specifications
+```text
+Dynamic SFTP network transport extension module using SSHFS FUSE.
+Automates secure encrypted storage routing abstractions with signal cleanup guards.
+```
+---
+
 ## usb (`unknown`)
 **Summary:** No help text provided.
 
