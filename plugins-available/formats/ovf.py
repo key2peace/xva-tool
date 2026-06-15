@@ -44,7 +44,7 @@ def get_write_pipeline(target_path, args=None):
 	base_name = os.path.basename(target_path).replace(".ova", "")
 	workspace_dir = "/tmp/xvatool_ova_workspace_{}".format(os.getpid())
 	if not os.path.exists(workspace_dir):
-		os.makedirs(workspace_dir, 0700)
+		os.makedirs(workspace_dir, 448)
 
 	target_raw_file = os.path.join(workspace_dir, base_name + ".vmdk")
 

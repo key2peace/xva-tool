@@ -82,11 +82,11 @@ def prepare_storage(uri_string, args=None, read_only=False):
 	if not os.path.exists(tmp_mountpoint):
 		os.makedirs(tmp_mountpoint, 448)
 
-	# Security Guard: Write credentials to a separate 0600 file to hide passwords from ps aux
+	# Security Guard: Write credentials to a separate 384 file to hide passwords from ps aux
 	cred_file = "/tmp/xvatool_smb_cred_{}".format(pid)
 	try:
 		with open(cred_file, "w") as cf:
-			os.chmod(cred_file, 0600)
+			os.chmod(cred_file, 384)
 			cf.write("username={}\n".format(user))
 			if password:
 				cf.write("password={}\n".format(password))

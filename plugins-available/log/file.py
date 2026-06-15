@@ -40,7 +40,7 @@ def resolve_log_destination(args=None):
 
 	if not os.path.exists(target_dir):
 		try:
-			os.makedirs(target_dir, 0755)
+			os.makedirs(target_dir, 488)
 		except OSError:
 			target_dir = "./logs" # Fallback straight to local workspace context
 			if not os.path.exists(target_dir):

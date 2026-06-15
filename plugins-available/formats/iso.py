@@ -54,7 +54,7 @@ def get_write_pipeline(target_path, args=None):
 	pid = os.getpid()
 	workspace_dir = "/tmp/xvatool_iso_workspace_{}".format(pid)
 	if not os.path.exists(workspace_dir):
-		os.makedirs(workspace_dir, 0700)
+		os.makedirs(workspace_dir, 448)
 
 	target_raw_file = os.path.join(workspace_dir, "disk.img")
 

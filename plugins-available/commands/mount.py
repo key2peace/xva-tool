@@ -73,7 +73,7 @@ class XvaVirtualFileSystem(fuse.Fuse):
 		"""Defines the virtual directory file tree entries and ownership attributes."""
 		st = fuse.Stat()
 		if path == '/':
-			st.st_mode = fuse.S_IFDIR | 0755
+			st.st_mode = fuse.S_IFDIR | 488
 			st.st_nlink = 2
 		elif path == '/' + self.virtual_file_name:
 			st.st_mode = fuse.S_IFREG | 0644
