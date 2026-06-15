@@ -1,0 +1,51 @@
+name: XVA-TOOL Documentation Generator
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'xva-tool'
+      - 'plugins-available/**'
+      - 'generate_docs.py'
+
+# Absolute FIFO sequence. Never execute documentation builds in parallel.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-docs:
+    name: Compile and Synchronize Ecosystem Docs
+    runs-on: ubuntu-latest
+    
+    # Enforce precise permissions to allow file modification and git pushes
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+
+      - name: Setup Python Runtime (CI Host Environment)
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Execute Docstring Extraction Matrix
+        run: |
+          python generate_docs.py
+
+      - name: Commit and Push Updated Markdown Docs
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Check if generate_docs.py actually mutated any documentation bits
+          if [ -n "$(git status --porcelain docs/)" ]; then
+            echo "[*] Structural docs updates discovered. Injecting modifications..."
+            git add docs/
+            git commit -m "Docs: Automated synchronization of developer API specifications from code docstrings [CI SKIP]"
+            git push
+          else
+            echo "[🟢] Documentation is already bitwise synchronized with the codebase. Skipping commit loop."
+          fi
