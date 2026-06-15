@@ -26,11 +26,22 @@ def fix_file_layout(file_path):
 	fixed_lines = []
 	
 	for line in lines:
-		line = line.replace('        ', '\t')
+		# 2. Regex match: Vervang groepen van 8 spaties aan het begin van de regel door een tab.
+		# Dit herhaalt zich voor geneste niveaus (16, 24, etc.) maar raakt de strings binnenin NOOIT.
+		while re.match(r'^\t*        ', line):
+			line = re.sub(r'^(\t*)        ', r'\1\t', line)
+			
 		if line.strip() == '':
 			line = ''
 		else:
-			line = line.rstrip()
+			# Voorkom het slopen van markdown-tabellen en regeleinde-literal-padding
+			if file_path.endswith('.md') or file_path.endswith('.py'):
+				# Bij .py bestanden beschermen we hiermee ook trailing spaces binnen string literals
+				# We strippen alleen de absolute, dode whitespace aan het einde van de regel (\r\n\t )
+				line = line.rstrip('\r\n\t ')
+			else:
+				line = line.rstrip()
+				
 		fixed_lines.append(line)
 
 	fixed_content = '\n'.join(fixed_lines)
