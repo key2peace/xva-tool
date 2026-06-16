@@ -24,9 +24,9 @@ WORKDIR /app
 
 # Clone active core executable bundles and templates into the system container path
 COPY xva-tool /usr/local/bin/xva-tool
-COPY xvapkg /usr/local/bin/xvapkg
+COPY xva-pkg /usr/local/bin/xva-pkg
 COPY xva-tool.conf.example /etc/xva-tool/conf-available/global.conf
-RUN chmod +x /usr/local/bin/xva-tool /usr/local/bin/xvapkg
+RUN chmod +x /usr/local/bin/xva-tool /usr/local/bin/xva-pkg
 
 # Establish internal shared bind mountpoints for localized volume storage array access
 VOLUME ["/data", "/etc/xva-tool", "/var/log"]
