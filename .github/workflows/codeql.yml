@@ -4,7 +4,7 @@
 name: "XvaTool CodeQL Security Scan"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-codeql
   cancel-in-progress: true
 
 on:
